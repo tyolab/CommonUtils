@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2015 TYONLINE TECHNOLOGY PTY. LTD. (TYO Lab)
+ * 
+ */
+
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
