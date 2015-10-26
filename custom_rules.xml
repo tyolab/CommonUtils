@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<target name="jar">
+	  <mkdir dir="dist"/>
+	  <delete file="dist/CommonUtils.jar" />
+	  <jar destfile="dist/CommonUtils.jar" 
+	   		>
+			<manifest>
+	            <attribute name="Main-Class" value="CommonUtils"/>
+	        </manifest>
+	        
+			  <fileset dir="bin/classes">
+			    <include name="**/au/**"/>
+			  </fileset>
+	    </jar>
+	</target>
+</project>
