@@ -8,17 +8,22 @@ package au.com.tyo.services;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,7 +35,9 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
+import android.net.Uri;
 import au.com.tyo.io.IO;
+import au.com.tyo.services.Http.Settings;
 
 public class Http {
 	
@@ -38,13 +45,23 @@ public class Http {
 	public static String DEFAULT_USER_AGENT_MOBILE = DEFAULT_USER_AGENT + " Mobile Safari/534.30";
 			
 	public static final int METHOD_GET = 1;
-	public static final int METHOD_POST = 2;
+	public static final int METHOD_POST = 2;  // x-www-form-urlencoded
+	public static final int METHOD_POST_MULTIPART_FORM_DATA = 22; // multpart/form-data
 	public static final int METHOD_PUT = 3;
 	public static final int METHOD_DELETE = 4;
 	
     private static final int CONNECTION_CONNECT_TIMEOUT = 30000; // 30 seconds
     private static final int CONNECTION_READ_TIMEOUT = 180000; // 180 seconds
 	private static final int PROGRESS_MAX = 100;
+	
+	private static final String CRLF = "\r\n";
+	private static final String TWOHYPHENS = "--";
+	private static final String BOUNDARY =  "0t1y2o3l4a5b6";
+	
+	public static final String MIME_TYPE_XML = "text/xml";
+	public static final String MIME_TYPE_JSON = "text/json";
+	public static final String MIME_TYPE_PLAIN = "text/plain";
+	
 	
 	private static String userAgent;
     
@@ -66,25 +83,131 @@ public class Http {
 	private Map<String, String> headers;
 	private int method;
 	
-	private String cookieFile;
+	private static String cookiePath = ".";
+	
+//	private String cookieFile;
+	
+	public static void setCookiePath(String path) {
+		cookiePath = path;
+	}
 	
 	static {
 		userAgent = DEFAULT_USER_AGENT;
 	}
 	
-	public static class Parameter {
-		String name;
-		String value;
+	public static class Settings {
+
+		boolean keepAlive;
+		
+		boolean automaticLoadCookie;
+		
+		long storedModifiedDate;
+		
+		List<Parameter> params; // the parameters that need to posted
+
+		List<Parameter> multipart; //
+		
+		public Settings() {
+			this(null);
+			automaticLoadCookie = false;
+			keepAlive = true;
+			storedModifiedDate = 0;
+		}
+		
+		public Settings(List<Parameter> params) {
+			this.params = params;
+		}
+
+		public boolean isKeepAlive() {
+			return keepAlive;
+		}
+
+		public void setKeepAlive(boolean keepAlive) {
+			this.keepAlive = keepAlive;
+		}
+
+		public boolean isAutomaticLoadCookie() {
+			return automaticLoadCookie;
+		}
+
+		public void setAutomaticLoadCookie(boolean automaticLoadCookie) {
+			this.automaticLoadCookie = automaticLoadCookie;
+		}
+
+		public long getStoredModifiedDate() {
+			return storedModifiedDate;
+		}
+
+		public void setStoredModifiedDate(long storedModifiedDate) {
+			this.storedModifiedDate = storedModifiedDate;
+		}
+
+		public List<Parameter> getParams() {
+			return params;
+		}
+
+		public void setParams(List<Parameter> params) {
+			this.params = params;
+		}
+
+		public boolean hasParams() {
+			return null != params && params.size() > 0;
+		}
+		
+	}
+	
+	public static class Parameter extends AbstractMap.SimpleEntry<String, String> {
+		public static final String DELIMETER = ";";
+		
+		String contentType;
+		
+		HashMap<String, String> extra;
 		
 		public Parameter(String name, String value) {
-			this.name = name;
-			this.value = value;
+			super(name, value);
+			
+			contentType = MIME_TYPE_PLAIN;
+			extra = null;
 		}
+
+		public String getContentType() {
+			return contentType;
+		}
+
+		public void setContentType(String contentType) {
+			this.contentType = contentType;
+		}
+		
+		public void addExtra(String name, String value) {
+			if (extra == null)
+				extra = new HashMap<String, String>();
+			
+			extra.put(name, value);
+		}
+		
+		public String extraToString() {
+			if (null == extra)
+				return "";
+			
+			StringBuffer sb = new StringBuffer();
+			
+			for (Entry<String, String> entry : extra.entrySet()) {
+				if (sb.length() > 0)
+					sb.append("; ");
+				
+				sb.append(entry.getKey() + "=\"" + entry.getValue() + "\"");
+				
+			}
+			
+			return sb.toString();
+		}
+		
+		public boolean isNotPlainText() { return !contentType.equals(MIME_TYPE_PLAIN); }
 	}
 	
 	public Http() {
 		headers = new HashMap<String, String>();
-		cookieFile = null;
+//		cookieFile = null;
 	}
 	
 	public static void setUserAgent(String agent) {
@@ -116,29 +239,68 @@ public class Http {
 			method = whatMethod;
 	}
 	
-	public void addCookieFile(String filename) {
-		cookieFile = (filename);
+	public String createCookieFile() {
+		return createCookieFile(httpConn.getURL().getHost());
 	}
 	
-	public void loadCookieFromFile() {
+	public static String createCookieFile(String host) {
+		return cookiePath + File.separator + host + ".cookie";
+	}
+	
+	public void loadCookieFromFile(String cookieFile) {
 		if (null != cookieFile) {
-//			try {
-			String text = new String(IO.readFileIntoBytes(cookieFile));
-			String[] cookies = text.split(";");
-			for (int i = 0; i < cookies.length; ++i) {
-				try {
-					String[] values = cookies[i].split(":");
-					clientSideCookies.put(values[0], values[1]);
-				}
-				catch (Exception ex){
-					
-				}
+			File file = new File(cookieFile);
+			
+			if (file.exists()) {
+				String text = new String(IO.readFileIntoBytes(file));
+				String[] cookies = text.split(";");
+				if (null != cookies)
+					for (int i = 0; i < cookies.length; ++i) {
+						try {
+							String[] values = cookies[i].split(":");
+							if (null != values && values.length == 2)
+								clientSideCookies.put(values[0], values[1]);
+						}
+						catch (Exception ex){
+							
+						}
+					}
 			}
 //			}
 //			catch (Exception ex){
 //				
 //			}	
 		}
+	}
+	
+	public void saveCookieToFile() throws IOException {
+		String cookieFile = createCookieFile();
+		if (clientSideCookies.size() > 0) {
+			BufferedWriter writer = null;
+			try {
+				writer = new BufferedWriter(new FileWriter(cookieFile, false));
+//				int count = 0;
+				for (Entry entry : clientSideCookies.entrySet()) {
+					String key = (String) entry.getKey();
+					String value = (String) entry.getValue();
+					
+					writer.write(key +":" + value + ";");
+//					if (count > 0)
+//						writer.write(";");
+//					++count;
+				}
+			}
+			catch (IOException ex) {
+				throw ex;
+			}
+			finally {
+				if (null != writer)
+					writer.close();
+			}
+		}
+//		Uri uri = Uri.parse(httpConn.getURL());
+//		String host = httpConn.getURL().getHost();
+//		String cookieName = host + ".cookie";
 	}
 	
 	public synchronized HttpURLConnection init(String url) {
@@ -158,16 +320,20 @@ public class Http {
 	}
 	
 	public synchronized String get(String url) throws Exception {
-		return get(url, 0);
+		return get(url, 0, true);
 	}
 	
-	public synchronized String get(String url, long storedModifiedDate) throws Exception {
+	public synchronized String get(String url, boolean keepAlive) throws Exception {
+		return get(url, 0, keepAlive);
+	}
+	
+	public synchronized String get(String url, long storedModifiedDate, boolean keepAlive) throws Exception {
 		httpConn = init(url); //connection;
-		return connect(httpConn, null, storedModifiedDate);
+		return connect(httpConn, null, storedModifiedDate, keepAlive);
 	}
 	
 	private synchronized String get(HttpURLConnection connection) throws Exception {
-		return connect(connection, null, 0);
+		return connect(connection, null, 0, true);
 	}
 	
 	public static String getQuery(List<Parameter> params) throws UnsupportedEncodingException
@@ -182,38 +348,43 @@ public class Http {
 	        else
 	            result.append("&");
 
-	        result.append(URLEncoder.encode(pair.name, "UTF-8"));
+	        result.append(URLEncoder.encode(pair.getKey(), "UTF-8"));
 	        result.append("=");
-	        result.append(URLEncoder.encode(pair.value, "UTF-8"));
+	        result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
 	    }
 
 	    return result.toString();
 	}
 	
 	public synchronized String post(String url) throws Exception {
-		return post(url, null);
+		return post(url, new Settings());
 	}
 	
-	public synchronized String upload(String url, List<Parameter> params) throws Exception {
+	public synchronized String upload(String url, Settings settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
-		httpConn.setRequestProperty("Content-Type", "multipart/form-data");
-		
-		return post(httpConn, params);
+		httpConn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + TWOHYPHENS + BOUNDARY + CRLF);
+
+		return post(httpConn, settings, METHOD_POST_MULTIPART_FORM_DATA);
 	}
 	
-	public synchronized String post(String url, List<Parameter> params) throws Exception {
+	public synchronized String post(String url, Settings settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
 		httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		return post(httpConn, params);
+		return post(httpConn, settings);
 	}
 	
-	public synchronized String post(HttpURLConnection httpConn, List<Parameter> params) throws Exception {
+	public synchronized String post(HttpURLConnection httpConn, Settings settings) throws Exception {
+		return post(httpConn, settings, METHOD_POST);
+	}
+	
+	public synchronized String post(HttpURLConnection httpConn, Settings settings, int postMethod) throws Exception {
 		String output = ""; 
-		setMethod(METHOD_POST);
+		setMethod(postMethod);
 		httpConn.setRequestMethod("POST");
+		httpConn.setRequestProperty("Cache-Contro", "no-cache");
 
 		try {
-			output = connect(httpConn, params, 0);
+			output = connect(httpConn, settings);
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -222,8 +393,17 @@ public class Http {
 		return output;
 	}
 	
-	private synchronized String connect(HttpURLConnection connection, List<Parameter> params, long storedModifiedDate) throws Exception 
-	{
+	private synchronized String connect(HttpURLConnection connection, List<Parameter> params, 
+			long storedModifiedDate, boolean keepAlive) throws Exception {
+		Settings settings = new Settings();
+		settings.setKeepAlive(keepAlive);
+		settings.setParams(params);
+		settings.setStoredModifiedDate(storedModifiedDate);
+		
+		return connect(connection, settings);
+	}
+		
+	private synchronized String connect(HttpURLConnection connection, Settings settings) throws Exception {
 		inUsed = true;
 		
 		BufferedReader br = null;
@@ -246,14 +426,18 @@ public class Http {
 			setConnectionProperties();
 			setHeaders();
 			
+			if (settings.isAutomaticLoadCookie()) {
+				String cookieFile = createCookieFile();
+				loadCookieFromFile(cookieFile);
+			}
         	setCookies(httpConn, clientSideCookies);
         	
-			httpConn.setRequestProperty( "charset", "utf-8");
+			httpConn.setRequestProperty( "Charset", "utf-8");
         	
 			try {		
 				// method
 				switch (method) {
-				case METHOD_GET:
+				case METHOD_GET: // not implemented
 				case METHOD_DELETE:			
 					connection.setInstanceFollowRedirects(true);
 					connection.setUseCaches(true);
@@ -265,6 +449,7 @@ public class Http {
 					break;
 				case METHOD_PUT:
 				case METHOD_POST:
+				case METHOD_POST_MULTIPART_FORM_DATA:
 					httpConn.setInstanceFollowRedirects(false);
 					httpConn.setUseCaches(false);
 					connection.setDoInput(true);
@@ -273,25 +458,39 @@ public class Http {
 					break;
 				}
 				
+				if (!settings.isKeepAlive()) {
+					httpConn.setRequestProperty("Connection", "close"); 
+					
+					/*
+					 * as for Android, this may be necessary to avoid the SocketException: 
+					 * 	libcore.io.ErrnoException: recvfrom failed: ECONNRESET (Connection reset by peer)
+					 */
+//					String value = System.getProperty("http.keepAlive");
+//					System.setProperty("http.keepAlive", "false");
+				}
+				else
+					httpConn.setRequestProperty("Connection", "Keep-Alive"); 
+				
 	            /*
 	             * If the modified date isn't 0, sets another request property to ensure that
 	             * data is only downloaded if it has changed since the last recorded
 	             * modification date. Formats the date according to the RFC1123 format.
 	             */
-	            if (0 != storedModifiedDate) {
+	            if (0 != settings.getStoredModifiedDate()) {
 	                connection.setRequestProperty(
 	                        "If-Modified-Since",
 	                        org.apache.http.impl.cookie.DateUtils.formatDate(
-	                                new Date(storedModifiedDate),
+	                                new Date(settings.getStoredModifiedDate()),
 	                                org.apache.http.impl.cookie.DateUtils.PATTERN_RFC1123));
 	            }
 			
 			try {
 				
-	            if (null != params && params.size() > 0) {
+	            if (settings.hasParams()) {
     				
 	    			try {		
-	    				
+						os = httpConn.getOutputStream();
+	    				writer = new DataOutputStream(os);
 	    				// method
 	    				switch (method) {
 	    				case METHOD_GET:
@@ -300,25 +499,69 @@ public class Http {
 	    					break;
 	    				case METHOD_PUT:
 	    				case METHOD_POST:
-							String urlParameters = getQuery(params);
-							byte[] postData = urlParameters .getBytes();
+							String urlParameters = getQuery(settings.getParams());
+							byte[] postData = urlParameters.getBytes();
 							
 							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
-	
-							os = httpConn.getOutputStream();
 				//			BufferedWriter writer = new BufferedWriter(
 				//			        new OutputStreamWriter(os, "UTF-8"));
-							writer = new DataOutputStream(os);
+							
 						    writer.write(postData);
-							writer.flush();
-	    					writer.close();
-	    					writer = null;
+
+	    					break;
+	    				case METHOD_POST_MULTIPART_FORM_DATA:
+	    					// now the content
+	    					writer.writeBytes(CRLF);
+	    					boolean needTwoHyphens = false;
+	    					if (settings.getParams().size() > 1) // yeah, multi parts
+	    						needTwoHyphens = true; 
+	    					String boundary = (needTwoHyphens ? TWOHYPHENS : "") + BOUNDARY;
+	    					
+	    					for (Parameter param : settings.getParams()) {
+		    					writer.writeBytes(boundary);
+		    					writer.writeBytes(CRLF);
+		    					
+		    					String extra = param.extraToString();
+		    					String line = String.format("Content-Disposition: form-data; name=\"%s\"%s", 
+		    							param.getKey(), extra.length() > 0 ? ("; " + extra) : "");
+		    					
+		    					if (param.isNotPlainText())
+		    						writer.writeBytes(param.getContentType());
+		    					
+		    					writer.writeBytes(CRLF);
+		    					
+		    					writer.writeBytes(param.getValue());
+	    					}
+	    					
+	    					writer.writeBytes(boundary);
+	    					writer.writeBytes(TWOHYPHENS);
+	    						
 	    					break;
 	    				}
+						writer.flush();
+
 	    			}
 	    			catch (Exception ex) {
 	    				ex.printStackTrace();
 	    			}
+	    			finally {
+    					writer.close();
+    					writer = null;
+	    			}
+	            }
+	            else {
+    				switch (method) {
+    				case METHOD_GET:
+    				case METHOD_DELETE:
+    					
+    					break;
+    				case METHOD_PUT:
+    				case METHOD_POST:
+    					httpConn.setRequestProperty("Content-Length", "0");
+    					break;
+					default:
+						break;
+    				}
 	            }
 				
 				connection.connect();
@@ -337,6 +580,13 @@ public class Http {
 			}
 			finally {
 				responseCode = connection.getResponseCode();
+			}
+			
+			if (!settings.isKeepAlive()) {
+				/*
+				 * with previous settings
+				 */
+//				System.setProperty("http.keepAlive", "true");
 			}
 			
 			/**
@@ -564,7 +814,7 @@ public class Http {
 		List<String> values = headers.get("Set-Cookie");
 
 		if (values != null) {
-			String cookieValue = null;
+//			String cookieValue = null;
 			for (Iterator iter = values.iterator(); iter.hasNext(); ) {
 			     String cookie = (String) iter.next();
 			     
@@ -604,4 +854,5 @@ public class Http {
 	public void addCookies(Map<String, String> cookies) {
 		this.clientSideCookies.putAll(cookies);
 	}
+
 }

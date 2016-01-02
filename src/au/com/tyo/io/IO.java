@@ -37,11 +37,20 @@ public class IO {
 	
 	static public byte[] readFileIntoBytes(File file) {
 	    byte[] bytes = null;
+	    FileInputStream fis = null;
 		try {
-			FileInputStream fis = new FileInputStream(file);
+			fis = new FileInputStream(file);
 		    bytes = readFileIntoBytes(fis);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		finally {
+			if (null != fis)
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 		return bytes;
 	}
