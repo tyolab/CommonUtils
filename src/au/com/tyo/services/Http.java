@@ -56,6 +56,7 @@ public class Http {
 	public static final String MIME_TYPE_JSON = "text/json";
 	public static final String MIME_TYPE_PLAIN = "text/plain";
 	
+	public static final String HEADER_SET_COOKIE = "Set-Cookie";
 	
 	private static String userAgent;
     
@@ -466,6 +467,13 @@ public class Http {
 	                                org.apache.http.impl.cookie.DateUtils.PATTERN_RFC1123));
 	            }
 			
+	        /*
+	         * VERY IMPORTANT!
+	         * 
+	         * all the setrequestpropertys have to happen before getting the outputstream which mean it will connect
+	         * to server automatically
+	         * 
+	         */
 			try {
 				
 	            if (settings.hasParams()) {
@@ -480,15 +488,14 @@ public class Http {
 	    					break;
 	    				case METHOD_PUT:
 	    				case METHOD_POST:
-							os = httpConn.getOutputStream();
-		    				writer = new DataOutputStream(os);
 							String urlParameters = getQuery(settings.getParams());
 							postData = urlParameters.getBytes();
 							
-//							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
 				//			BufferedWriter writer = new BufferedWriter(
 				//			        new OutputStreamWriter(os, "UTF-8"));
-							
+							os = httpConn.getOutputStream();
+		    				writer = new DataOutputStream(os);
 						    writer.write(postData);
 
 	    					break;
@@ -813,30 +820,49 @@ public class Http {
 		}
 	}
 	
-	private void getCookies( Map<String, String> cookies) {
+	private void getCookies(Map<String, String> cookies) {
 		Map<String, List<String>> headers = httpConn.getHeaderFields();
-		List<String> values = headers.get("Set-Cookie");
+		
+		/*
+		 * loop the header not by get, because of the case-insensitive thingy
+		 */
+		
+		
+		List<String> values = headers.get(HEADER_SET_COOKIE);
 
-		if (values != null) {
+		if (values != null && values.size() > 0) {
 //			String cookieValue = null;
-			for (Iterator iter = values.iterator(); iter.hasNext(); ) {
-			     String cookie = (String) iter.next();
-			     
-			     /*
-			      * why ignore the session cookie?
-			      * comment it off for now
-			      */
-			     /*
-	             if (cookie.contains("_session"))
-	                 continue;
-				 */
-			     
-	             cookie = cookie.substring(0, cookie.indexOf(';'));
-	             String name = cookie.substring(0, cookie.indexOf('='));
-	             String value = cookie.substring(cookie.indexOf('=') + 1, cookie.length());
-	             cookies.put(name, value);
-			} 
+			headerToCookie(cookies, values);
 		}
+		else {
+			for (Entry entry : headers.entrySet()) {
+				String key = (String) entry.getKey();
+				if (null != key && key.equalsIgnoreCase(HEADER_SET_COOKIE)) {
+					headerToCookie(cookies, (List<String>) entry.getValue());
+					break;
+				}
+			}
+		}
+	}
+
+	private void headerToCookie(Map<String, String> cookies, List<String> values) {
+		for (Iterator iter = values.iterator(); iter.hasNext(); ) {
+		     String cookie = (String) iter.next();
+		     
+		     /*
+		      * why ignore the session cookie?
+		      * comment it off for now
+		      */
+		     /*
+            if (cookie.contains("_session"))
+                continue;
+			 */
+		     
+            cookie = cookie.substring(0, cookie.indexOf(';'));
+            String name = cookie.substring(0, cookie.indexOf('='));
+            String value = cookie.substring(cookie.indexOf('=') + 1, cookie.length());
+            cookies.put(name, value);
+		} 
 	}
 
 	public String getUrl() {
