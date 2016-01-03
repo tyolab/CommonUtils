@@ -9,22 +9,18 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,9 +31,7 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
-import android.net.Uri;
 import au.com.tyo.io.IO;
-import au.com.tyo.services.Http.Settings;
 
 public class Http {
 	
@@ -56,7 +50,7 @@ public class Http {
 	
 	private static final String CRLF = "\r\n";
 	private static final String TWOHYPHENS = "--";
-	private static final String BOUNDARY =  "0t1y2o3l4a5b6";
+	private static final String BOUNDARY =  "-----------------0t1y2o3l4a5b6";
 	
 	public static final String MIME_TYPE_XML = "text/xml";
 	public static final String MIME_TYPE_JSON = "text/json";
@@ -329,11 +323,11 @@ public class Http {
 	
 	public synchronized String get(String url, long storedModifiedDate, boolean keepAlive) throws Exception {
 		httpConn = init(url); //connection;
-		return connect(httpConn, null, storedModifiedDate, keepAlive);
+		return connect(null, storedModifiedDate, keepAlive);
 	}
 	
 	private synchronized String get(HttpURLConnection connection) throws Exception {
-		return connect(connection, null, 0, true);
+		return connect(null, 0, true);
 	}
 	
 	public static String getQuery(List<Parameter> params) throws UnsupportedEncodingException
@@ -362,29 +356,30 @@ public class Http {
 	
 	public synchronized String upload(String url, Settings settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
-		httpConn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + TWOHYPHENS + BOUNDARY + CRLF);
+		String contentType = "multipart/form-data; boundary=" + BOUNDARY;
+		httpConn.setRequestProperty("Content-Type", contentType);
 
-		return post(httpConn, settings, METHOD_POST_MULTIPART_FORM_DATA);
+		return post(settings, METHOD_POST_MULTIPART_FORM_DATA);
 	}
 	
 	public synchronized String post(String url, Settings settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
 		httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		return post(httpConn, settings);
+		return post(settings);
 	}
 	
-	public synchronized String post(HttpURLConnection httpConn, Settings settings) throws Exception {
-		return post(httpConn, settings, METHOD_POST);
+	public synchronized String post(Settings settings) throws Exception {
+		return post(settings, METHOD_POST);
 	}
 	
-	public synchronized String post(HttpURLConnection httpConn, Settings settings, int postMethod) throws Exception {
+	public synchronized String post(Settings settings, int postMethod) throws Exception {
 		String output = ""; 
 		setMethod(postMethod);
 		httpConn.setRequestMethod("POST");
-		httpConn.setRequestProperty("Cache-Contro", "no-cache");
+		httpConn.setRequestProperty("Cache-Control", "no-cache");
 
 		try {
-			output = connect(httpConn, settings);
+			output = connect(settings);
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -393,17 +388,17 @@ public class Http {
 		return output;
 	}
 	
-	private synchronized String connect(HttpURLConnection connection, List<Parameter> params, 
+	private synchronized String connect(List<Parameter> params, 
 			long storedModifiedDate, boolean keepAlive) throws Exception {
 		Settings settings = new Settings();
 		settings.setKeepAlive(keepAlive);
 		settings.setParams(params);
 		settings.setStoredModifiedDate(storedModifiedDate);
 		
-		return connect(connection, settings);
+		return connect(settings);
 	}
 		
-	private synchronized String connect(HttpURLConnection connection, Settings settings) throws Exception {
+	private synchronized String connect(Settings settings) throws Exception {
 		inUsed = true;
 		
 		BufferedReader br = null;
@@ -430,7 +425,7 @@ public class Http {
 				String cookieFile = createCookieFile();
 				loadCookieFromFile(cookieFile);
 			}
-        	setCookies(httpConn, clientSideCookies);
+        	setCookies(clientSideCookies);
         	
 			httpConn.setRequestProperty( "Charset", "utf-8");
         	
@@ -439,12 +434,12 @@ public class Http {
 				switch (method) {
 				case METHOD_GET: // not implemented
 				case METHOD_DELETE:			
-					connection.setInstanceFollowRedirects(true);
-					connection.setUseCaches(true);
+					httpConn.setInstanceFollowRedirects(true);
+					httpConn.setUseCaches(true);
 					
 					// timeout
-					connection.setConnectTimeout(CONNECTION_CONNECT_TIMEOUT);
-					connection.setReadTimeout(CONNECTION_READ_TIMEOUT);
+					httpConn.setConnectTimeout(CONNECTION_CONNECT_TIMEOUT);
+					httpConn.setReadTimeout(CONNECTION_READ_TIMEOUT);
 					
 					break;
 				case METHOD_PUT:
@@ -452,24 +447,11 @@ public class Http {
 				case METHOD_POST_MULTIPART_FORM_DATA:
 					httpConn.setInstanceFollowRedirects(false);
 					httpConn.setUseCaches(false);
-					connection.setDoInput(true);
+					httpConn.setDoInput(true);
 					httpConn.setDoOutput(true);
 					
 					break;
 				}
-				
-				if (!settings.isKeepAlive()) {
-					httpConn.setRequestProperty("Connection", "close"); 
-					
-					/*
-					 * as for Android, this may be necessary to avoid the SocketException: 
-					 * 	libcore.io.ErrnoException: recvfrom failed: ECONNRESET (Connection reset by peer)
-					 */
-//					String value = System.getProperty("http.keepAlive");
-//					System.setProperty("http.keepAlive", "false");
-				}
-				else
-					httpConn.setRequestProperty("Connection", "Keep-Alive"); 
 				
 	            /*
 	             * If the modified date isn't 0, sets another request property to ensure that
@@ -477,7 +459,7 @@ public class Http {
 	             * modification date. Formats the date according to the RFC1123 format.
 	             */
 	            if (0 != settings.getStoredModifiedDate()) {
-	                connection.setRequestProperty(
+	                httpConn.setRequestProperty(
 	                        "If-Modified-Since",
 	                        org.apache.http.impl.cookie.DateUtils.formatDate(
 	                                new Date(settings.getStoredModifiedDate()),
@@ -487,10 +469,9 @@ public class Http {
 			try {
 				
 	            if (settings.hasParams()) {
-    				
+	            	byte[] postData = null;
 	    			try {		
-						os = httpConn.getOutputStream();
-	    				writer = new DataOutputStream(os);
+
 	    				// method
 	    				switch (method) {
 	    				case METHOD_GET:
@@ -499,10 +480,12 @@ public class Http {
 	    					break;
 	    				case METHOD_PUT:
 	    				case METHOD_POST:
+							os = httpConn.getOutputStream();
+		    				writer = new DataOutputStream(os);
 							String urlParameters = getQuery(settings.getParams());
-							byte[] postData = urlParameters.getBytes();
+							postData = urlParameters.getBytes();
 							
-							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+//							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
 				//			BufferedWriter writer = new BufferedWriter(
 				//			        new OutputStreamWriter(os, "UTF-8"));
 							
@@ -511,31 +494,39 @@ public class Http {
 	    					break;
 	    				case METHOD_POST_MULTIPART_FORM_DATA:
 	    					// now the content
-	    					writer.writeBytes(CRLF);
+	    					StringBuffer sb = new StringBuffer();
+	    					sb.append(CRLF);
 	    					boolean needTwoHyphens = false;
 	    					if (settings.getParams().size() > 1) // yeah, multi parts
 	    						needTwoHyphens = true; 
-	    					String boundary = (needTwoHyphens ? TWOHYPHENS : "") + BOUNDARY;
+	    					String boundary = (needTwoHyphens ? TWOHYPHENS : "") + BOUNDARY + CRLF;
 	    					
 	    					for (Parameter param : settings.getParams()) {
-		    					writer.writeBytes(boundary);
-		    					writer.writeBytes(CRLF);
+		    					sb.append(boundary);
 		    					
 		    					String extra = param.extraToString();
 		    					String line = String.format("Content-Disposition: form-data; name=\"%s\"%s", 
-		    							param.getKey(), extra.length() > 0 ? ("; " + extra) : "");
+		    							param.getKey(), extra.length() > 0 ? ("; " + extra) : "") + CRLF;
+		    					sb.append(line);
 		    					
 		    					if (param.isNotPlainText())
-		    						writer.writeBytes(param.getContentType());
+		    						sb.append("Content-Type:" + param.getContentType() + CRLF);
+
+		    					sb.append(CRLF);
 		    					
-		    					writer.writeBytes(CRLF);
-		    					
-		    					writer.writeBytes(param.getValue());
+		    					sb.append(param.getValue());
+		    					sb.append(CRLF);
 	    					}
+	    					sb.append(TWOHYPHENS);
+	    					sb.append(BOUNDARY);
+	    					sb.append(TWOHYPHENS);
 	    					
-	    					writer.writeBytes(boundary);
-	    					writer.writeBytes(TWOHYPHENS);
-	    						
+	    					postData = sb.toString().getBytes();
+	    					httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+	    					
+							os = httpConn.getOutputStream();
+		    				writer = new DataOutputStream(os);
+		    				writer.write(postData);
 	    					break;
 	    				}
 						writer.flush();
@@ -557,20 +548,33 @@ public class Http {
     					break;
     				case METHOD_PUT:
     				case METHOD_POST:
-    					httpConn.setRequestProperty("Content-Length", "0");
+//    					httpConn.setRequestProperty("Content-Length", "0");
     					break;
 					default:
 						break;
     				}
 	            }
 				
-				connection.connect();
+//				if (!settings.isKeepAlive()) {
+//					httpConn.setRequestProperty("Connection", "close"); 
+//					
+//					/*
+//					 * as for Android, this may be necessary to avoid the SocketException: 
+//					 * 	libcore.io.ErrnoException: recvfrom failed: ECONNRESET (Connection reset by peer)
+//					 */
+////					String value = System.getProperty("http.keepAlive");
+////					System.setProperty("http.keepAlive", "false");
+//				}
+//				else
+//					httpConn.setRequestProperty("Connection", "Keep-Alive"); 
+				
+				httpConn.connect();
 	            
-				is = connection.getInputStream();
+				is = httpConn.getInputStream();
 				
 		        if (cacheCookie)
 		        {
-		            getCookies(connection, serverSideCookies);
+		            getCookies(serverSideCookies);
 		            clientSideCookies.putAll(serverSideCookies);
 //		            serverSideCookies.putAll(clientSideCookies);
 		        }
@@ -579,7 +583,7 @@ public class Http {
 				is = httpConn.getErrorStream();
 			}
 			finally {
-				responseCode = connection.getResponseCode();
+				responseCode = httpConn.getResponseCode();
 			}
 			
 			if (!settings.isKeepAlive()) {
@@ -594,15 +598,15 @@ public class Http {
 			 * let's do it in the simplest way here for now
 			 */
 			if (responseCode >= 300 && responseCode <= 310) {
-				return get(connection.getHeaderField("location"));
+				return get(httpConn.getHeaderField("location"));
 			}
 			
 			InputStream in = null;
 			
 			try {
-				if (enableCompression && "gzip".equals(connection.getContentEncoding()))
+				if (enableCompression && "gzip".equals(httpConn.getContentEncoding()))
 					in = new GZIPInputStream(is);
-				else if (enableCompression && "deflate".equals(connection.getContentEncoding())) {
+				else if (enableCompression && "deflate".equals(httpConn.getContentEncoding())) {
 					in = new ZipInputStream(is);
 				}
 				else
@@ -622,7 +626,7 @@ public class Http {
 					}
 					
 			        // get cookies
-					double contentLength = connection.getContentLength();
+					double contentLength = httpConn.getContentLength();
 					double bytesRead = 0.0;
 					double progress = 20.0;
 			
@@ -666,7 +670,7 @@ public class Http {
 //		catch (IOException e) {
 //			e.printStackTrace();
 //			try {
-//				responseCode = connection.getResponseCode();
+//				responseCode = httpConn.getResponseCode();
 //			} catch (IOException e1) {
 //
 //			};
@@ -678,7 +682,7 @@ public class Http {
 //		}
 //		catch (Exception e) {
 //			try {
-//				responseCode = connection.getResponseCode();
+//				responseCode = httpConn.getResponseCode();
 //			} catch (IOException e1) {
 //
 //			};
@@ -795,7 +799,7 @@ public class Http {
 		connection.setRequestProperty("User-Agent", userAgent);
 	}
 	
-	private void setCookies(URLConnection connection, Map<String, String> cookies) {
+	private void setCookies(Map<String, String> cookies) {
 		if (cookies != null) {
 	        StringBuilder cookie = new StringBuilder();
 	        for (Map.Entry<String, String> entry : cookies.entrySet())
@@ -805,12 +809,12 @@ public class Http {
 	            cookie.append(entry.getValue());
 	            cookie.append("; ");
 	        }
-	        connection.setRequestProperty("Cookie", cookie.toString());
+	        httpConn.setRequestProperty("Cookie", cookie.toString());
 		}
 	}
 	
-	private void getCookies(URLConnection connection, Map<String, String> cookies) {
-		Map<String, List<String>> headers = connection.getHeaderFields();
+	private void getCookies( Map<String, String> cookies) {
+		Map<String, List<String>> headers = httpConn.getHeaderFields();
 		List<String> values = headers.get("Set-Cookie");
 
 		if (values != null) {
@@ -843,15 +847,15 @@ public class Http {
 		headers.put(header, value);
 	}
 
-	public Map<String, String> getCookies() {
+	public Map<String, String> getClientCookies() {
 		return clientSideCookies;
 	}
 
-	public void setCookies(Map<String, String> cookies) {
+	public void setClientCookies(Map<String, String> cookies) {
 		this.clientSideCookies = cookies;
 	}
 	
-	public void addCookies(Map<String, String> cookies) {
+	public void addClientCookies(Map<String, String> cookies) {
 		this.clientSideCookies.putAll(cookies);
 	}
 
