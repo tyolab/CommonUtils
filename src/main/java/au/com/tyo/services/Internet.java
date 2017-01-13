@@ -3,15 +3,7 @@
  * 
  */
 
-/*
- * Copyright (C) 2015 TYONLINE TECHNOLOGY PTY. LTD.
- *
- */
-
 package au.com.tyo.services;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 public class Internet {
 	
@@ -21,9 +13,10 @@ public class Internet {
 		String[] testList = {"http://www.google.com", "http://www.bing.com", "http://www.yandex.com/", "http://www.soso.com/"};
 		
 		for (String url : testList) {
-	        HttpGet requestForTest = new HttpGet(url);
+	        Http http = HttpPool.getInstance().getConnection();
+
 	        try {
-	            new DefaultHttpClient().execute(requestForTest); // can last...
+				http.get(url);
 	            responded = true;
 	            break;
 	        } 

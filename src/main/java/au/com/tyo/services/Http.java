@@ -20,14 +20,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
@@ -460,11 +463,13 @@ public class Http {
 	             * modification date. Formats the date according to the RFC1123 format.
 	             */
 	            if (0 != settings.getStoredModifiedDate()) {
+					SimpleDateFormat dateFormat = new SimpleDateFormat(
+							"EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+					dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
 	                httpConn.setRequestProperty(
 	                        "If-Modified-Since",
-	                        org.apache.http.impl.cookie.DateUtils.formatDate(
-	                                new Date(settings.getStoredModifiedDate()),
-	                                org.apache.http.impl.cookie.DateUtils.PATTERN_RFC1123));
+                            dateFormat.format(new Date(settings.getStoredModifiedDate())));
 	            }
 			
 	        /*
