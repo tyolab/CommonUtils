@@ -7,7 +7,6 @@ package au.com.tyo.io;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -218,5 +217,26 @@ public class FileUtils implements IOConstants {
 		++number;
 
 		return newfile + number + ext;
+	}
+
+	/**
+	 *
+	 * @param fileName
+     */
+	public static void delete(String fileName) throws FileNotFoundException {
+		delete(new File(fileName));
+	}
+
+	/**
+	 *
+	 * @param f
+     */
+	public static void delete(File f) throws FileNotFoundException {
+		if (f.isDirectory()) {
+			for (File c : f.listFiles())
+				delete(c);
+		}
+
+		if (!f.delete()) throw new FileNotFoundException("Failed to delete file: " + f);
 	}
 }
