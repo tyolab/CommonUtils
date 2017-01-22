@@ -5,6 +5,9 @@
 
 package au.com.tyo.web;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 public class UrlUtils {
 	
 	public static String extractDomain(String url) {
@@ -26,4 +29,11 @@ public class UrlUtils {
 		return domain;
 	}
 
+	public static URI urlToURI(String url) {
+		try {
+			return new URI(url);
+		} catch (URISyntaxException e) {
+			return null;
+		}
+	}
 }
