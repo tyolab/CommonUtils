@@ -17,6 +17,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 public class IO {
+
+	public static final int BUFFER_SIZE = 4096;
 	
 	// In android, 
     // We guarantee that the available method returns the total
@@ -121,7 +123,7 @@ public class IO {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 		int nRead;
-		byte[] data = new byte[16384];
+		byte[] data = new byte[BUFFER_SIZE];
 
 		while ((nRead = is.read(data, 0, data.length)) != -1) {
 		  buffer.write(data, 0, nRead);
@@ -130,5 +132,18 @@ public class IO {
 		buffer.flush();
 
 		return buffer.toByteArray();
+	}
+
+	public static long writeFile(String tempFile, InputStream is) throws IOException {
+        FileOutputStream fos = new FileOutputStream(new File(tempFile));
+
+        long nread = 0L;
+        byte[] buf = new byte[BUFFER_SIZE];
+        int n;
+        while ((n = is.read(buf)) > 0) {
+            fos.write(buf, 0, n);
+            nread += n;
+        }
+        return nread;
 	}
 }
