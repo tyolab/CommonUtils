@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 TYONLINE TECHNOLOGY PTY. LTD. (TYO Lab)
+ * Copyright (C) 2017 TYONLINE TECHNOLOGY PTY. LTD. (TYO Lab)
  * 
  */
 
@@ -13,30 +13,73 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 public class IO {
 
 	public static final int BUFFER_SIZE = 4096;
-	
-	// In android, 
-    // We guarantee that the available method returns the total
-    // size of the asset...  of course, this does mean that a single
-    // asset can't be more than 2 gigs.
+
+	/**
+	 *
+	 * @param file
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object readObject(File file) throws Exception {
+		Object target = null;
+		FileInputStream fileIn = null;
+		ObjectInputStream in = null;
+		try {
+			fileIn = new FileInputStream(file);
+			in = new ObjectInputStream(fileIn);
+			target = (Object) in.readObject();
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			try {
+				file.delete();
+			}
+			catch (Exception deleteEx) {}
+			throw ex;
+		}
+		finally {
+			try {
+				if (in != null ) in.close();
+				if (fileIn != null ) fileIn.close();
+			}
+			catch (Exception e) {}
+		}
+		return target;
+	}
+
+	/**
+	 * 	// In android,
+	 // We guarantee that the available method returns the total
+	 // size of the asset...  of course, this does mean that a single
+	 // asset can't be more than 2 gigs.
+	 *
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 */
 	static public byte[] readFileIntoBytes(InputStream is) throws IOException {
 	    int size;
 	    byte[] bytes = null;
-//		try {
-			size = is.available();
-		    bytes = new byte[size];
-		    is.read(bytes, 0, size);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+
+		size = is.available();
+		bytes = new byte[size];
+		is.read(bytes, 0, size);
 		return bytes;
 	}
-	
+
+    /**
+     *
+     * @param file
+     * @return
+     */
 	static public byte[] readFileIntoBytes(File file) {
 	    byte[] bytes = null;
 	    FileInputStream fis = null;
@@ -57,13 +100,19 @@ public class IO {
 		return bytes;
 	}
 	
-	/*
-	 * TODO charsets
+	/**
+	 * TODO
+     * charsets
 	 */
 	static public byte[] readFileIntoBytes(String file) {
 		return readFileIntoBytes(new File(file));
 	}
-	
+
+	/**
+	 *
+	 * @param file
+	 * @return
+	 */
 	static String readFileIntoString(String file) {
 		String content = null;
 		try {
@@ -73,11 +122,22 @@ public class IO {
 		}
 		return content;
 	}
-	
+
+	/**
+	 *
+	 * @param filename
+	 * @param bytes
+	 */
 	public static void writeFile(String filename, byte[] bytes) {
 		writeFile(filename, bytes, "UTF-8");
 	}
 
+	/**
+	 *
+	 * @param filename
+	 * @param bytes
+	 * @param charset
+	 */
 	public static void writeFile(String filename, byte[] bytes, String charset) {
         FileOutputStream out = null;
 		try {
@@ -96,11 +156,22 @@ public class IO {
 		    catch(Exception ex) {} 
 		}
 	}
-	
+
+	/**
+	 *
+	 * @param file
+	 * @param content
+	 */
 	public static void writeFile(File file, String content) {
 		writeFile(file, content, "UTF-8");
 	}
-	
+
+	/**
+	 *
+	 * @param file
+	 * @param content
+	 * @param charset
+	 */
 	public static void writeFile(File file, String content, String charset) {
         BufferedWriter out = null;
 		try {
@@ -134,6 +205,13 @@ public class IO {
 		return buffer.toByteArray();
 	}
 
+	/**
+	 *
+	 * @param tempFile
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 */
 	public static long writeFile(String tempFile, InputStream is) throws IOException {
         FileOutputStream fos = new FileOutputStream(new File(tempFile));
 
@@ -145,5 +223,35 @@ public class IO {
             nread += n;
         }
         return nread;
+	}
+
+	/**
+	 *
+	 * @param target
+	 * @param file
+	 * @throws Exception
+	 */
+	public static void writeObject(Object target, File file) throws Exception {
+		FileOutputStream fileOut = null;
+		ObjectOutputStream out = null;
+		try
+		{
+			fileOut = new FileOutputStream(file);
+			out = new ObjectOutputStream(fileOut);
+			out.writeObject(target);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+		finally {
+			try {
+				if (out != null )
+					out.close();
+				if (fileOut != null)
+					fileOut.close();
+			}
+			catch(Exception ex) {}
+		}
 	}
 }
