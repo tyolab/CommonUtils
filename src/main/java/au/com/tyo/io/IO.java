@@ -22,6 +22,32 @@ public class IO {
 
 	public static final int BUFFER_SIZE = 4096;
 
+    /**
+     *
+     *
+     * @param fileIn
+     * @return
+     * @throws Exception
+     */
+    public static Object readObject(InputStream fileIn) throws Exception {
+        Object target = null;
+        ObjectInputStream in = null;
+        try {
+            in = new ObjectInputStream(fileIn);
+            target = (Object) in.readObject();
+        }
+        finally {
+            try {
+                if (in != null ) in.close();
+                if (fileIn != null ) fileIn.close();
+            }
+            catch (Exception e) {
+                throw e;
+            }
+        }
+        return target;
+    }
+
 	/**
 	 *
 	 * @param file
@@ -29,30 +55,12 @@ public class IO {
 	 * @throws Exception
 	 */
 	public static Object readObject(File file) throws Exception {
-		Object target = null;
+
 		FileInputStream fileIn = null;
-		ObjectInputStream in = null;
-		try {
-			fileIn = new FileInputStream(file);
-			in = new ObjectInputStream(fileIn);
-			target = (Object) in.readObject();
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			try {
-				file.delete();
-			}
-			catch (Exception deleteEx) {}
-			throw ex;
-		}
-		finally {
-			try {
-				if (in != null ) in.close();
-				if (fileIn != null ) fileIn.close();
-			}
-			catch (Exception e) {}
-		}
-		return target;
+        fileIn = new FileInputStream(file);
+
+        Object obj = readObject(fileIn);
+        return obj;
 	}
 
 	/**
