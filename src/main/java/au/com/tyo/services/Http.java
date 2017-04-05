@@ -22,6 +22,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -104,12 +105,16 @@ public class Http {
 		List<Parameter> params; // the parameters that need to posted
 
 		List<Parameter> multipart; //
+
+		List<Parameter> headers;
 		
 		public Settings() {
 			this(null);
 			automaticLoadCookie = false;
 			keepAlive = true;
 			storedModifiedDate = 0;
+			headers = new ArrayList<>();
+			params = new ArrayList<>();
 		}
 		
 		public Settings(List<Parameter> params) {
@@ -144,6 +149,18 @@ public class Http {
 			return params;
 		}
 
+		public List<Parameter> getHeaders() {
+			return headers;
+		}
+
+		public void addHeader(String header, String value) {
+			headers.add(new Parameter(header, value));
+		}
+
+		public void addParam(String name, String value) {
+			params.add(new Parameter(name, value));
+		}
+
 		public void setParams(List<Parameter> params) {
 			this.params = params;
 		}
@@ -152,6 +169,10 @@ public class Http {
 			return null != params && params.size() > 0;
 		}
 		
+	}
+
+	static public Settings createDefaultSettings() {
+		return new Settings();
 	}
 	
 	public static class Parameter extends AbstractMap.SimpleEntry<String, String> {
@@ -424,6 +445,7 @@ public class Http {
 			// connection properties
 			setConnectionProperties();
 			setHeaders();
+			setHeaders(settings.getHeaders().toArray());
 			
 			if (settings.isAutomaticLoadCookie()) {
 				String cookieFile = createCookieFile();
@@ -729,9 +751,19 @@ public class Http {
 
 	private void setHeaders() {
 		Set<Entry<String, String>> allHeaders = headers.entrySet();
-//		Entry<String, String> entry = null;
-		for (Entry<String, String> entry : allHeaders) {
-			httpConn.setRequestProperty(entry.getKey(), entry.getValue());
+		setHeaders(allHeaders.toArray());
+	}
+
+	public void setHeaders(Object[] objects) {
+		for (Object obj : objects) {
+			if (obj instanceof Entry) {
+				Entry<String, String> entry = (Entry) obj;
+				httpConn.setRequestProperty(entry.getKey(), entry.getValue());
+			}
+			else if (obj instanceof Parameter) {
+				Parameter param = (Parameter) obj;
+				httpConn.setRequestProperty(param.getKey(), param.getValue());
+			}
 		}
 	}
 
