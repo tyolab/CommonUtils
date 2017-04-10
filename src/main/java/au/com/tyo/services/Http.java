@@ -83,6 +83,8 @@ public class Http {
 	private int method;
 	
 	private static String cookiePath = ".";
+
+	private boolean cancelled;
 	
 //	private String cookieFile;
 	
@@ -243,6 +245,14 @@ public class Http {
 
 	public synchronized void setInUsed(boolean inUsed) {
 		this.inUsed = inUsed;
+	}
+
+	public synchronized boolean isCancelled() {
+		return cancelled;
+	}
+
+	public synchronized void setCancelled(boolean cancelled) {
+		this.cancelled = cancelled;
 	}
 
 	public HttpRequestListener getCaller() {
@@ -425,6 +435,7 @@ public class Http {
 		
 	private synchronized String connect(Settings settings) throws Exception {
 		inUsed = true;
+		cancelled = false;
 		
 		BufferedReader br = null;
 		
@@ -455,7 +466,7 @@ public class Http {
         	
 			httpConn.setRequestProperty( "Charset", "utf-8");
         	
-			try {		
+			try {
 				// method
 				switch (method) {
 				case METHOD_GET: // not implemented
@@ -475,7 +486,6 @@ public class Http {
 					httpConn.setUseCaches(false);
 					httpConn.setDoInput(true);
 					httpConn.setDoOutput(true);
-					
 					break;
 				}
 				
@@ -601,10 +611,11 @@ public class Http {
 //				}
 //				else
 //					httpConn.setRequestProperty("Connection", "Keep-Alive"); 
-				
+
+
 				httpConn.connect();
-	            
-				is = httpConn.getInputStream();
+	            if (!isCancelled())
+					is = httpConn.getInputStream();
 				
 		        if (cacheCookie)
 		        {
@@ -669,6 +680,9 @@ public class Http {
 	
 					while ((line = br.readLine()) != null)
 					{
+						if (isCancelled())
+							break;
+
 					    text.append(line);
 					    text.append("\n");
 					    
@@ -743,9 +757,10 @@ public class Http {
 				writer.close();
 			if (null != os)
 				os.close();
+
+			reset();
 		}
-			
-		reset();
+
         return text.toString();
 	}
 
