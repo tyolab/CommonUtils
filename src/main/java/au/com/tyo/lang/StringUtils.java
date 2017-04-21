@@ -1620,4 +1620,13 @@ public class StringUtils {
 
         return true;
     }
+
+    /**
+     *
+     * @param str
+     * @return
+     */
+    public static String ifNullToEmpty(String str) {
+        return null != str ? str : "";
+    }
 }
