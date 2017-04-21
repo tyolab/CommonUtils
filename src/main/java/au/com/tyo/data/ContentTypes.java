@@ -22,7 +22,8 @@ public class ContentTypes {
         "mpg",
         "mpeg",
         "m4p",
-        "m4v"
+        "m4v",
+        "wmv"
     };
 
     private static final List VIDEO_EXTENSION_LIST = Arrays.asList(VIDEO_EXTENSIONS);
@@ -41,7 +42,7 @@ public class ContentTypes {
         String fileExt = ext;
         if (ext.charAt(0) == '.')
             fileExt = ext.substring(1);
-        return ext;
+        return fileExt;
     }
 
     /**
@@ -74,7 +75,6 @@ public class ContentTypes {
 
         String fileExt = extensionCheck(ext).toLowerCase();
 
-        list.contains(fileExt);
-        return false;
+        return list.contains(fileExt);
     }
 }
