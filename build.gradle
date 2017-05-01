@@ -1,7 +1,15 @@
 apply plugin: 'java'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
     compile files('libs/json-java-android.jar')
+
+    compile 'org.twitter4j:twitter4j-core:4.0.2'
 }
 
 repositories {

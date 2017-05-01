@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
@@ -26,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -764,11 +767,18 @@ public class Http {
         return text.toString();
 	}
 
+    /**
+     *
+     */
 	private void setHeaders() {
 		Set<Entry<String, String>> allHeaders = headers.entrySet();
 		setHeaders(allHeaders.toArray());
 	}
 
+    /**
+     *
+     * @param objects
+     */
 	public void setHeaders(Object[] objects) {
 		for (Object obj : objects) {
 			if (obj instanceof Entry) {
@@ -808,7 +818,11 @@ public class Http {
 	       return false;
 	    }
 	}
-	
+
+    /**
+     *
+     * @return
+     */
 	public long getLastModifiedDate() {
 		return httpConn.getLastModified();
 	}
@@ -844,20 +858,35 @@ public class Http {
 //		return new Date(date);
 	}
 
+    /**
+     *
+     */
 	public void setConnectionProperties() {
 		// enable gzip compression
 		if (enableCompression)
 			httpConn.setRequestProperty("Accept-encoding", "gzip,deflate");
 	}
-	
+
+    /**
+     *
+     */
 	public void setUserAgent() {
 		setUserAgent(httpConn, userAgent);
 	}
-	
+
+    /**
+     *
+     * @param connection
+     * @param userAgent
+     */
 	public static void setUserAgent(URLConnection connection, String userAgent) {
 		connection.setRequestProperty("User-Agent", userAgent);
 	}
-	
+
+    /**
+     *
+     * @param cookies
+     */
 	private void setCookies(Map<String, String> cookies) {
 		if (cookies != null) {
 	        StringBuilder cookie = new StringBuilder();
@@ -871,7 +900,11 @@ public class Http {
 	        httpConn.setRequestProperty("Cookie", cookie.toString());
 		}
 	}
-	
+
+    /**
+     *
+     * @param cookies
+     */
 	private void getCookies(Map<String, String> cookies) {
 		Map<String, List<String>> headers = httpConn.getHeaderFields();
 		
@@ -897,6 +930,11 @@ public class Http {
 		}
 	}
 
+    /**
+     *
+     * @param cookies
+     * @param values
+     */
 	private void headerToCookie(Map<String, String> cookies, List<String> values) {
 		for (Iterator iter = values.iterator(); iter.hasNext(); ) {
 		     String cookie = (String) iter.next();
@@ -917,24 +955,84 @@ public class Http {
 		} 
 	}
 
+    /**
+     *
+     * @return
+     */
 	public String getUrl() {
 		return this.httpConn.getURL().toString();
 	}
 
+    /**
+     *
+     * @param header
+     * @param value
+     */
 	public void setHeader(String header, String value) {
 		headers.put(header, value);
 	}
 
+    /**
+     *
+     * @return
+     */
 	public Map<String, String> getClientCookies() {
 		return clientSideCookies;
 	}
 
+    /**
+     *
+     * @param cookies
+     */
 	public void setClientCookies(Map<String, String> cookies) {
 		this.clientSideCookies = cookies;
 	}
-	
+
+    /**
+     *
+     * @param cookies
+     */
 	public void addClientCookies(Map<String, String> cookies) {
 		this.clientSideCookies.putAll(cookies);
 	}
 
+	/**
+	 *
+	 * code from: http://stackoverflow.com/questions/13592236/parse-a-uri-string-into-name-value-collection
+	 *
+	 * @param url
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static Map<String, List<String>> toQueryParameterList(URL url) throws UnsupportedEncodingException {
+		final Map<String, List<String>> query_pairs = new LinkedHashMap<String, List<String>>();
+		final String[] pairs = url.getQuery().split("&");
+		for (String pair : pairs) {
+			final int idx = pair.indexOf("=");
+			final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), "UTF-8") : pair;
+			if (!query_pairs.containsKey(key)) {
+				query_pairs.put(key, new LinkedList<String>());
+			}
+			final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : null;
+			query_pairs.get(key).add(value);
+		}
+		return query_pairs;
+	}
+
+    /**
+     *
+     * @param url
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public static Map<String, String> toQueryParameters(URL url) throws UnsupportedEncodingException {
+        Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+        String query = url.getQuery();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+        }
+        return query_pairs;
+    }
 }
