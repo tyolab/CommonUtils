@@ -13,7 +13,7 @@ public class Internet {
 		String[] testList = {"http://www.google.com", "http://www.bing.com", "http://www.yandex.com/", "http://www.soso.com/"};
 		
 		for (String url : testList) {
-	        Http http = HttpPool.getInstance().getConnection();
+	        HttpConnection http = HttpPool.getInstance().getConnection();
 
 	        try {
 				http.get(url);

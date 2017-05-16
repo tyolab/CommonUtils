@@ -8,20 +8,28 @@ package au.com.tyo.services;
 import java.util.ArrayList;
 
 public class HttpPool {
+
 	private static final int POOL_SIZE = 5;
 	private static final int WAIT_FOR_HOW_LONG = 5 * 60 * 1000; // 5 minutes
 	
-	private ArrayList<Http> pool;
+	private ArrayList<HttpConnection> pool;
 	
 	private static HttpPool instance;
 	
 	private int size;
 
 	public HttpPool() {
-		pool = new ArrayList<Http>(1);
-		pool.add(new Http());
+		pool = new ArrayList<HttpConnection>(1);
 		size = POOL_SIZE;
 	}
+
+	public void addHttpInstance(HttpConnection instance) {
+		pool.add(instance);
+	}
+
+	public void addHttpInstanceDefault() {
+        addHttpInstance(new Http());
+    }
 
 	public synchronized static HttpPool getInstance() {
 		if (instance == null)
@@ -29,20 +37,25 @@ public class HttpPool {
 		return instance;
 	}
 	
-	public synchronized Http getConnection() {
+	public synchronized HttpConnection getConnection() {
 		long start = System.nanoTime();
-		Http available = null;
+		HttpConnection available = null;
 		while (available == null) {
-			for (Http conn : pool) {
+            if (pool.size() == 0)
+                addHttpInstanceDefault();
+
+			for (HttpConnection conn : pool) {
 				if (!conn.isInUsed()) {
 					available = conn;
 					break;
 				}
 			}
+
 			if (available == null && pool.size() < size) {
 				available = new Http();
 				pool.add(available);
 			}
+
 			if (available == null)
 				try {
 					Thread.sleep(1000);
