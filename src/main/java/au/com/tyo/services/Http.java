@@ -76,7 +76,7 @@ public class Http extends HttpConnection {
 	}
 
     @Override
-	public synchronized String post(String url, Settings settings) throws Exception {
+	public synchronized InputStream post(String url, Settings settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
 		httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 		return post(settings);
@@ -107,6 +107,12 @@ public class Http extends HttpConnection {
 		settings.setStoredModifiedDate(storedModifiedDate);
 		
 		return connect(settings);
+	}
+
+	@Override
+	public String postJSON(String url, Object json) throws IOException {
+		httpConn.setRequestProperty("Content-Type", "application/json");
+		return null;
 	}
 
 	protected synchronized String connect(Settings settings) throws Exception {
@@ -198,8 +204,12 @@ public class Http extends HttpConnection {
 	    					break;
 	    				case METHOD_PUT:
 	    				case METHOD_POST:
-							String urlParameters = getQuery(settings.getParams());
-							postData = urlParameters.getBytes();
+							String postContent = null;
+							if (null != settings.getContent())
+								postContent = settings.getContent().toString();
+							else
+								postContent = getQuery(settings.getParams());
+							postData = postContent.getBytes();
 							
 							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
 				//			BufferedWriter writer = new BufferedWriter(

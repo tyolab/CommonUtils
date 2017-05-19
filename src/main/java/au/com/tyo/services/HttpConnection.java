@@ -65,16 +65,6 @@ public abstract class HttpConnection {
         userAgent = DEFAULT_USER_AGENT;
     }
 
-    public abstract String upload(String url, Settings settings) throws Exception;
-
-    public abstract String post(String url, Settings settings) throws Exception;
-
-    public abstract String post(Settings settings, int postMethod) throws Exception;
-
-    public abstract void setHeaders(Object[] objects);
-
-    public abstract String getUrl();
-
     public static class Settings {
 
         boolean keepAlive;
@@ -83,11 +73,16 @@ public abstract class HttpConnection {
 
         long storedModifiedDate;
 
+        /**
+         * for url encoded name / value pairs
+         */
         List<Parameter> params; // the parameters that need to posted
 
         List<Parameter> multipart; //
 
         List<Parameter> headers;
+
+        Object content;
 
         public Settings() {
             this(null);
@@ -146,10 +141,30 @@ public abstract class HttpConnection {
             this.params = params;
         }
 
+        public Object getContent() {
+            return content;
+        }
+
+        public void setContent(Object content) {
+            this.content = content;
+        }
+
         public boolean hasParams() {
             return null != params && params.size() > 0;
         }
 
+        public String toUrlEncodedString() throws UnsupportedEncodingException {
+            if (hasParams())
+                return getQuery(params);
+            return null;
+        }
+
+        public Map paramsToMap() {
+            Map map = new HashMap();
+            for (Parameter param : params)
+                map.put(param.getKey(), param.getValue());
+            return map;
+        }
     }
 
     static public Settings createDefaultSettings() {
@@ -582,4 +597,16 @@ public abstract class HttpConnection {
         }
         return null;
     }
+
+    public abstract String upload(String url, Settings settings) throws Exception;
+
+    public abstract InputStream post(String url, Settings settings) throws Exception;
+
+    public abstract String post(Settings settings, int postMethod) throws Exception;
+
+    public abstract void setHeaders(Object[] objects);
+
+    public abstract String getUrl();
+
+    public abstract InputStream postJSON(String url, Object json) throws IOException;
 }
