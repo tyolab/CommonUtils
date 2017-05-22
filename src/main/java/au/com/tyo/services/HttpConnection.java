@@ -240,6 +240,21 @@ public abstract class HttpConnection {
 
     protected boolean cancelled;
 
+    /**
+     * Indicator for letting the process keep the instance for private use
+     *
+     */
+
+    private boolean engaged;
+
+    public void setEngaged(boolean engaged) {
+        this.engaged = engaged;
+    }
+
+    public boolean isEngaged() {
+        return engaged;
+    }
+
     public static void setCookiePath(String path) {
         cookiePath = path;
     }
@@ -371,16 +386,51 @@ public abstract class HttpConnection {
         return get(url, 0, keepAlive);
     }
 
+    /**
+     *
+     * @param url
+     * @param storedModifiedDate
+     * @param keepAlive
+     * @return
+     * @throws Exception
+     */
     public abstract String get(String url, long storedModifiedDate, boolean keepAlive) throws Exception;
 
-    public synchronized String post(String url) throws Exception {
+    /**
+     *
+     * @param url
+     * @return
+     * @throws Exception
+     */
+    public synchronized InputStream post(String url) throws Exception {
         return post(url, new Settings());
     }
 
-    public synchronized String post(Settings settings) throws Exception {
+    /**
+     *
+     * @param settings
+     * @return
+     * @throws Exception
+     */
+    public synchronized InputStream post(Settings settings) throws Exception {
         return post(settings, METHOD_POST);
     }
 
+    /**
+     * Return reponse as string
+     *
+     * @param settings
+     * @return
+     * @throws Exception
+     */
+    public String postForString(Settings settings) throws Exception {
+        return httpInputStreamToText(post(settings, METHOD_POST));
+    }
+
+    /**
+     *
+     * @return
+     */
     public int getResponseCode() {
         return responseCode;
     }
@@ -602,7 +652,7 @@ public abstract class HttpConnection {
 
     public abstract InputStream post(String url, Settings settings) throws Exception;
 
-    public abstract String post(Settings settings, int postMethod) throws Exception;
+    public abstract InputStream post(Settings settings, int postMethod) throws Exception;
 
     public abstract void setHeaders(Object[] objects);
 

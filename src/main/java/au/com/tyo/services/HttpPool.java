@@ -45,7 +45,7 @@ public class HttpPool {
                 addHttpInstanceDefault();
 
 			for (HttpConnection conn : pool) {
-				if (!conn.isInUsed()) {
+				if (!conn.isEngaged() && !conn.isInUsed()) {
 					available = conn;
 					break;
 				}
