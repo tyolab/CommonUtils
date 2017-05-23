@@ -16,14 +16,18 @@ public class HttpPool {
 	
 	private static HttpPool instance;
 	
-	private int size;
+	private static int size;
 
 	public HttpPool() {
-		pool = new ArrayList<HttpConnection>(1);
-		size = POOL_SIZE;
+		pool = new ArrayList<>();
+		size = -1;
 	}
 
-	public void addHttpInstance(HttpConnection instance) {
+    public static void setSize(int size) {
+        HttpPool.size = size;
+    }
+
+    public void addHttpInstance(HttpConnection instance) {
 		pool.add(instance);
 	}
 
@@ -31,13 +35,45 @@ public class HttpPool {
         addHttpInstance(new Http());
     }
 
+    public static void initialize(Class cls) throws IllegalAccessException, InstantiationException {
+        if (size == -1)
+            size = POOL_SIZE;
+
+        for (int i = 0; i < size; ++i)
+            getInstance().addHttpInstance((HttpConnection) cls.newInstance());
+    }
+
+    /**
+     *
+     * @return
+     */
 	public synchronized static HttpPool getInstance() {
 		if (instance == null)
 			instance = new HttpPool();
 		return instance;
 	}
-	
-	public synchronized HttpConnection getConnection() {
+
+	/**
+	 *
+	 * @return
+	 */
+	public synchronized HttpConnection getIdleConnection() {
+		return getConnectionInternal();
+	}
+
+    /**
+     *
+     * @return
+     */
+	public static synchronized HttpConnection getConnection() {
+		return getInstance().getConnectionInternal();
+	}
+
+    /**
+     *
+     * @return
+     */
+	private synchronized HttpConnection getConnectionInternal() {
 		long start = System.nanoTime();
 		HttpConnection available = null;
 		while (available == null) {

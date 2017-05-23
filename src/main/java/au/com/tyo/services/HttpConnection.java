@@ -65,7 +65,10 @@ public abstract class HttpConnection {
         userAgent = DEFAULT_USER_AGENT;
     }
 
-    public static class Settings {
+    public static class HttpRequest {
+        String url;
+
+        String requestMethod;
 
         boolean keepAlive;
 
@@ -84,8 +87,9 @@ public abstract class HttpConnection {
 
         Object content;
 
-        public Settings() {
-            this(null);
+        public HttpRequest(String url) {
+            this.url = url;
+            requestMethod = null;
             automaticLoadCookie = false;
             keepAlive = true;
             storedModifiedDate = 0;
@@ -93,7 +97,8 @@ public abstract class HttpConnection {
             params = new ArrayList<>();
         }
 
-        public Settings(List<Parameter> params) {
+        public HttpRequest(String url, List<Parameter> params) {
+            this(url);
             this.params = params;
         }
 
@@ -165,10 +170,14 @@ public abstract class HttpConnection {
                 map.put(param.getKey(), param.getValue());
             return map;
         }
+
+        public String getUrl() {
+            return url;
+        }
     }
 
-    static public Settings createDefaultSettings() {
-        return new Settings();
+    static public HttpRequest createDefaultSettings(String url) {
+        return new HttpRequest(url);
     }
 
     public static class Parameter extends AbstractMap.SimpleEntry<String, String> {
@@ -403,7 +412,7 @@ public abstract class HttpConnection {
      * @throws Exception
      */
     public synchronized InputStream post(String url) throws Exception {
-        return post(url, new Settings());
+        return post(new HttpRequest(url));
     }
 
     /**
@@ -412,7 +421,7 @@ public abstract class HttpConnection {
      * @return
      * @throws Exception
      */
-    public synchronized InputStream post(Settings settings) throws Exception {
+    public synchronized InputStream post(HttpRequest settings) throws Exception {
         return post(settings, METHOD_POST);
     }
 
@@ -423,7 +432,7 @@ public abstract class HttpConnection {
      * @return
      * @throws Exception
      */
-    public String postForString(Settings settings) throws Exception {
+    public String postForString(HttpRequest settings) throws Exception {
         return httpInputStreamToText(post(settings, METHOD_POST));
     }
 
@@ -648,11 +657,9 @@ public abstract class HttpConnection {
         return null;
     }
 
-    public abstract String upload(String url, Settings settings) throws Exception;
+    public abstract void upload(String url, HttpRequest settings) throws Exception;
 
-    public abstract InputStream post(String url, Settings settings) throws Exception;
-
-    public abstract InputStream post(Settings settings, int postMethod) throws Exception;
+    public abstract InputStream post(HttpRequest settings, int postMethod) throws Exception;
 
     public abstract void setHeaders(Object[] objects);
 

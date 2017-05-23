@@ -52,45 +52,37 @@ public class Http extends HttpConnection {
 		return 	(HttpURLConnection)connection;
 	}
 
-	public synchronized String get() throws Exception {
-		return get(httpConn);
-	}
-
 	@Override
 	public synchronized String get(String url, long storedModifiedDate, boolean keepAlive) throws Exception {
 		httpConn = init(url); //connection;
-		return connect(null, storedModifiedDate, keepAlive);
-	}
-
-    protected synchronized String get(HttpURLConnection connection) throws Exception {
-		return connect(null, 0, true);
+		return connect(url, null, storedModifiedDate, keepAlive);
 	}
 
     @Override
-	public synchronized String upload(String url, Settings settings) throws Exception {
+	public synchronized void upload(String url, HttpRequest settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
 		String contentType = "multipart/form-data; boundary=" + BOUNDARY;
 		httpConn.setRequestProperty("Content-Type", contentType);
 
-		return post(settings, METHOD_POST_MULTIPART_FORM_DATA);
+		post(settings, METHOD_POST_MULTIPART_FORM_DATA);
 	}
 
     @Override
-	public synchronized InputStream post(String url, Settings settings) throws Exception {
-		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
+	public synchronized InputStream post(HttpRequest settings) throws Exception {
+		httpConn = (HttpURLConnection) new URL(settings.getUrl()).openConnection(); //init(url);
 		httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 		return post(settings);
 	}
 
     @Override
-	public synchronized String post(Settings settings, int postMethod) throws Exception {
-		String output = ""; 
+	public synchronized InputStream post(HttpRequest settings, int postMethod) throws Exception {
+		InputStream output = null;
 		setMethod(postMethod);
 		httpConn.setRequestMethod("POST");
 		httpConn.setRequestProperty("Cache-Control", "no-cache");
 
 		try {
-			output = connect(settings);
+			output = connectAsInputStream(settings);
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -99,23 +91,64 @@ public class Http extends HttpConnection {
 		return output;
 	}
 
-	protected synchronized String connect(List<Parameter> params,
+	protected synchronized String connect(String url, List<Parameter> params,
 			long storedModifiedDate, boolean keepAlive) throws Exception {
-		Settings settings = new Settings();
+		HttpRequest settings = new HttpRequest(url, params);
 		settings.setKeepAlive(keepAlive);
-		settings.setParams(params);
 		settings.setStoredModifiedDate(storedModifiedDate);
 		
 		return connect(settings);
 	}
 
 	@Override
-	public String postJSON(String url, Object json) throws IOException {
+	public InputStream postJSON(String url, Object json) throws IOException {
 		httpConn.setRequestProperty("Content-Type", "application/json");
 		return null;
 	}
 
-	protected synchronized String connect(Settings settings) throws Exception {
+	protected synchronized String connect(HttpRequest settings) throws Exception {
+        InputStream is = connectAsInputStream(settings);
+        InputStream in = null;
+
+        if (httpConn == null)
+            httpConn = init(settings.getUrl());
+
+        String text = null;
+        try {
+            try {
+                if (enableCompression && "gzip".equals(httpConn.getContentEncoding()))
+                    in = new GZIPInputStream(is);
+                else if (enableCompression && "deflate".equals(httpConn.getContentEncoding())) {
+                    in = new ZipInputStream(is);
+                }
+                else
+                    in = is;
+            }
+            catch (Exception e) {
+                in = is;
+            }
+
+            text = httpInputStreamToText(in, httpConn.getContentLength());
+
+            if (in instanceof GZIPInputStream)
+                is.close();
+            }
+        catch (java.lang.IllegalStateException ise) {
+            String msg = ise.getMessage();
+            if (msg.indexOf("Already connected") < 0)
+                throw ise;
+        }
+        catch (Exception others) {
+            throw others;
+        }
+        finally {
+//				httpConn.disconnect();
+        }
+        return text;
+	}
+
+	protected synchronized InputStream connectAsInputStream(HttpRequest settings) throws Exception {
+
 		inUsed = true;
 		cancelled = false;
 
@@ -123,165 +156,160 @@ public class Http extends HttpConnection {
 		OutputStream os = null;
 		DataOutputStream writer = null;
 
-        String text = null;
-//		try {
+		try {
 			
 			/*
 			 * 1. setup connection properties if it is a new conn
 			 */
 
-			setUserAgent();
-			
-			// connection properties
-			setConnectionProperties();
-			setHeaders();
-			setHeaders(settings.getHeaders().toArray());
-			
-			if (settings.isAutomaticLoadCookie()) {
-				String cookieFile = createCookieFile();
-				loadCookieFromFile(cookieFile);
-			}
-        	setCookies(clientSideCookies);
-        	
-			httpConn.setRequestProperty( "Charset", "utf-8");
-        	
-			try {
-				// method
-				switch (method) {
-				case METHOD_GET: // not implemented
-				case METHOD_DELETE:			
-					httpConn.setInstanceFollowRedirects(true);
-					httpConn.setUseCaches(true);
-					
-					// timeout
-					httpConn.setConnectTimeout(CONNECTION_CONNECT_TIMEOUT);
-					httpConn.setReadTimeout(CONNECTION_READ_TIMEOUT);
-					
-					break;
-				case METHOD_PUT:
-				case METHOD_POST:
-				case METHOD_POST_MULTIPART_FORM_DATA:
-					httpConn.setInstanceFollowRedirects(false);
-					httpConn.setUseCaches(false);
-					httpConn.setDoInput(true);
-					httpConn.setDoOutput(true);
-					break;
-				}
-				
-	            /*
-	             * If the modified date isn't 0, sets another request property to ensure that
-	             * data is only downloaded if it has changed since the last recorded
-	             * modification date. Formats the date according to the RFC1123 format.
-	             */
-	            if (0 != settings.getStoredModifiedDate()) {
-					SimpleDateFormat dateFormat = new SimpleDateFormat(
-							"EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-					dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            setUserAgent();
 
-	                httpConn.setRequestProperty(
-	                        "If-Modified-Since",
-                            dateFormat.format(new Date(settings.getStoredModifiedDate())));
-	            }
-			
-	        /*
-	         * VERY IMPORTANT!
-	         * 
-	         * all the setrequestpropertys have to happen before getting the outputstream which mean it will connect
-	         * to server automatically
-	         * 
-	         */
-			try {
-				
-	            if (settings.hasParams()) {
-	            	byte[] postData = null;
-	    			try {		
+            // connection properties
+            setConnectionProperties();
+            setHeaders();
+            setHeaders(settings.getHeaders().toArray());
 
-	    				// method
-	    				switch (method) {
-	    				case METHOD_GET:
-	    				case METHOD_DELETE:
-	    					
-	    					break;
-	    				case METHOD_PUT:
-	    				case METHOD_POST:
-							String postContent = null;
-							if (null != settings.getContent())
-								postContent = settings.getContent().toString();
-							else
-								postContent = getQuery(settings.getParams());
-							postData = postContent.getBytes();
-							
-							httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
-				//			BufferedWriter writer = new BufferedWriter(
-				//			        new OutputStreamWriter(os, "UTF-8"));
-							os = httpConn.getOutputStream();
-		    				writer = new DataOutputStream(os);
-						    writer.write(postData);
+            if (settings.isAutomaticLoadCookie()) {
+                String cookieFile = createCookieFile();
+                loadCookieFromFile(cookieFile);
+            }
+            setCookies(clientSideCookies);
 
-	    					break;
-	    				case METHOD_POST_MULTIPART_FORM_DATA:
-	    					// now the content
-	    					StringBuffer sb = new StringBuffer();
-	    					sb.append(CRLF);
-	    					boolean needTwoHyphens = false;
-	    					if (settings.getParams().size() > 1) // yeah, multi parts
-	    						needTwoHyphens = true; 
-	    					String boundary = (needTwoHyphens ? TWOHYPHENS : "") + BOUNDARY + CRLF;
-	    					
-	    					for (Parameter param : settings.getParams()) {
-		    					sb.append(boundary);
-		    					
-		    					String extra = param.extraToString();
-		    					String line = String.format("Content-Disposition: form-data; name=\"%s\"%s", 
-		    							param.getKey(), extra.length() > 0 ? ("; " + extra) : "") + CRLF;
-		    					sb.append(line);
-		    					
-		    					if (param.isNotPlainText())
-		    						sb.append("Content-Type:" + param.getContentType() + CRLF);
+            httpConn.setRequestProperty("Charset", "utf-8");
 
-		    					sb.append(CRLF);
-		    					
-		    					sb.append(param.getValue());
-		    					sb.append(CRLF);
-	    					}
-	    					sb.append(TWOHYPHENS);
-	    					sb.append(BOUNDARY);
-	    					sb.append(TWOHYPHENS);
-	    					
-	    					postData = sb.toString().getBytes();
-	    					httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
-	    					
-							os = httpConn.getOutputStream();
-		    				writer = new DataOutputStream(os);
-		    				writer.write(postData);
-	    					break;
-	    				}
-						writer.flush();
+            // method
+            switch (method) {
+                case METHOD_GET: // not implemented
+                case METHOD_DELETE:
+                    httpConn.setInstanceFollowRedirects(true);
+                    httpConn.setUseCaches(true);
 
-	    			}
-	    			catch (Exception ex) {
-	    				ex.printStackTrace();
-	    			}
-	    			finally {
-    					writer.close();
-    					writer = null;
-	    			}
-	            }
-	            else {
-    				switch (method) {
-    				case METHOD_GET:
-    				case METHOD_DELETE:
-    					
-    					break;
-    				case METHOD_PUT:
-    				case METHOD_POST:
+                    // timeout
+                    httpConn.setConnectTimeout(CONNECTION_CONNECT_TIMEOUT);
+                    httpConn.setReadTimeout(CONNECTION_READ_TIMEOUT);
+
+                    break;
+                case METHOD_PUT:
+                case METHOD_POST:
+                case METHOD_POST_MULTIPART_FORM_DATA:
+                    httpConn.setInstanceFollowRedirects(false);
+                    httpConn.setUseCaches(false);
+                    httpConn.setDoInput(true);
+                    httpConn.setDoOutput(true);
+                    break;
+            }
+
+            /*
+             * If the modified date isn't 0, sets another request property to ensure that
+             * data is only downloaded if it has changed since the last recorded
+             * modification date. Formats the date according to the RFC1123 format.
+             */
+            if (0 != settings.getStoredModifiedDate()) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat(
+                        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+                dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+                httpConn.setRequestProperty(
+                        "If-Modified-Since",
+                        dateFormat.format(new Date(settings.getStoredModifiedDate())));
+            }
+
+        /*
+         * VERY IMPORTANT!
+         *
+         * all the setrequestpropertys have to happen before getting the outputstream which mean it will connect
+         * to server automatically
+         *
+         */
+            try {
+
+                if (settings.hasParams()) {
+                    byte[] postData = null;
+                    try {
+
+                        // method
+                        switch (method) {
+                            case METHOD_GET:
+                            case METHOD_DELETE:
+
+                                break;
+                            case METHOD_PUT:
+                            case METHOD_POST:
+                                String postContent = null;
+                                if (null != settings.getContent())
+                                    postContent = settings.getContent().toString();
+                                else
+                                    postContent = getQuery(settings.getParams());
+                                postData = postContent.getBytes();
+
+                                httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+                                //			BufferedWriter writer = new BufferedWriter(
+                                //			        new OutputStreamWriter(os, "UTF-8"));
+                                os = httpConn.getOutputStream();
+                                writer = new DataOutputStream(os);
+                                writer.write(postData);
+
+                                break;
+                            case METHOD_POST_MULTIPART_FORM_DATA:
+                                // now the content
+                                StringBuffer sb = new StringBuffer();
+                                sb.append(CRLF);
+                                boolean needTwoHyphens = false;
+                                if (settings.getParams().size() > 1) // yeah, multi parts
+                                    needTwoHyphens = true;
+                                String boundary = (needTwoHyphens ? TWOHYPHENS : "") + BOUNDARY + CRLF;
+
+                                for (Parameter param : settings.getParams()) {
+                                    sb.append(boundary);
+
+                                    String extra = param.extraToString();
+                                    String line = String.format("Content-Disposition: form-data; name=\"%s\"%s",
+                                            param.getKey(), extra.length() > 0 ? ("; " + extra) : "") + CRLF;
+                                    sb.append(line);
+
+                                    if (param.isNotPlainText())
+                                        sb.append("Content-Type:" + param.getContentType() + CRLF);
+
+                                    sb.append(CRLF);
+
+                                    sb.append(param.getValue());
+                                    sb.append(CRLF);
+                                }
+                                sb.append(TWOHYPHENS);
+                                sb.append(BOUNDARY);
+                                sb.append(TWOHYPHENS);
+
+                                postData = sb.toString().getBytes();
+                                httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
+
+                                os = httpConn.getOutputStream();
+                                writer = new DataOutputStream(os);
+                                writer.write(postData);
+                                break;
+                        }
+                        writer.flush();
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    } finally {
+                        writer.close();
+                        writer = null;
+                    }
+                } else {
+                    switch (method) {
+                        case METHOD_GET:
+                        case METHOD_DELETE:
+
+                            break;
+                        case METHOD_PUT:
+                        case METHOD_POST:
 //    					httpConn.setRequestProperty("Content-Length", "0");
-    					break;
-					default:
-						break;
-    				}
-	            }
-				
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
 //				if (!settings.isKeepAlive()) {
 //					httpConn.setRequestProperty("Connection", "close"); 
 //					
@@ -296,106 +324,51 @@ public class Http extends HttpConnection {
 //					httpConn.setRequestProperty("Connection", "Keep-Alive"); 
 
 
-				httpConn.connect();
-	            if (!isCancelled())
-					is = httpConn.getInputStream();
-				
-		        if (cacheCookie)
-		        {
-		            getCookies(serverSideCookies);
-		            clientSideCookies.putAll(serverSideCookies);
+                httpConn.connect();
+                if (!isCancelled())
+                    is = httpConn.getInputStream();
+
+                if (cacheCookie) {
+                    getCookies(serverSideCookies);
+                    clientSideCookies.putAll(serverSideCookies);
 //		            serverSideCookies.putAll(clientSideCookies);
-		        }
-			}
-			catch (Exception ex) {
-				is = httpConn.getErrorStream();
-			}
-			finally {
-				responseCode = httpConn.getResponseCode();
-			}
-			
-			if (!settings.isKeepAlive()) {
-				/*
-				 * with previous settings
-				 */
+                }
+            } catch (Exception ex) {
+                is = httpConn.getErrorStream();
+            } finally {
+                responseCode = httpConn.getResponseCode();
+            }
+
+            if (!settings.isKeepAlive()) {
+            /*
+             * with previous settings
+             */
 //				System.setProperty("http.keepAlive", "true");
-			}
-			
-			/**
-			 * there are many possible ways to deal with each diffirent redirect reponse code
-			 * let's do it in the simplest way here for now
-			 */
-			if (responseCode >= 300 && responseCode <= 310) {
-				return get(httpConn.getHeaderField("location"));
-			}
-			
-			InputStream in = null;
-			
-			try {
-				if (enableCompression && "gzip".equals(httpConn.getContentEncoding()))
-					in = new GZIPInputStream(is);
-				else if (enableCompression && "deflate".equals(httpConn.getContentEncoding())) {
-					in = new ZipInputStream(is);
-				}
-				else
-					in = is;
-			}
-			catch (Exception e) {
-				in = is;
-			}
-			
-            text = httpInputStreamToText(in, httpConn.getContentLength());
+            }
 
-            if (in instanceof GZIPInputStream)
-                is.close();
-//		}
-//		catch (IOException e) {
-//			e.printStackTrace();
-//			try {
-//				responseCode = httpConn.getResponseCode();
-//			} catch (IOException e1) {
-//
-//			};
-//			
-//			if (responseCode == 404) {
-//				
-//			}
-//	
-//		}
-//		catch (Exception e) {
-//			try {
-//				responseCode = httpConn.getResponseCode();
-//			} catch (IOException e1) {
-//
-//			};
-//		}
-//		finally {
-			if (caller != null) {
-				progress = PROGRESS_MAX;
-				caller.onProgressChanged((int) progress);
-			}
-//		}
-		}
-		catch (java.lang.IllegalStateException ise) {
-			String msg = ise.getMessage();
-			if (msg.indexOf("Already connected") < 0)
-				throw ise;
-		}
-		catch (Exception others) {
-			throw others;
-		}
-		finally {
-//				httpConn.disconnect();
-			
-			if (null != writer)
-				writer.close();
-			if (null != os)
-				os.close();
+            /**
+             * there are many possible ways to deal with each diffirent redirect reponse code
+             * let's do it in the simplest way here for now
+             */
+            if (responseCode >= 300 && responseCode <= 310) {
+                return connectAsInputStream(new HttpRequest(httpConn.getHeaderField("location")));
+            }
+        }
+        finally {
+            if (caller != null) {
+                progress = PROGRESS_MAX;
+                caller.onProgressChanged((int) progress);
+            }
 
-			reset();
-		}
+            if (null != writer)
+                writer.close();
+            if (null != os)
+                os.close();
 
-        return text.toString();
+            reset();
+        }
+
+        return is;
 	}
 
     /**
@@ -521,4 +494,10 @@ public class Http extends HttpConnection {
 		return this.httpConn.getURL().toString();
 	}
 
+    @Override
+    protected void reset() {
+        super.reset();
+
+        httpConn = null;
+    }
 }
