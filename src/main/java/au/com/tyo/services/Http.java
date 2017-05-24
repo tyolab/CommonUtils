@@ -101,9 +101,9 @@ public class Http extends HttpConnection {
 	}
 
 	@Override
-	public InputStream postJSON(String url, Object json) throws IOException {
+	public InputStream postJSON(String url, Object json) throws Exception {
 		httpConn.setRequestProperty("Content-Type", "application/json");
-		return null;
+		return post(new HttpRequest(url), METHOD_POST);
 	}
 
 	protected synchronized String connect(HttpRequest settings) throws Exception {
@@ -497,7 +497,7 @@ public class Http extends HttpConnection {
     @Override
     protected void reset() {
         super.reset();
-
+        setInUsed(false);
         httpConn = null;
     }
 }

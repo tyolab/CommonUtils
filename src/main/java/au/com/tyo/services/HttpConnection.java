@@ -665,5 +665,5 @@ public abstract class HttpConnection {
 
     public abstract String getUrl();
 
-    public abstract InputStream postJSON(String url, Object json) throws IOException;
+    public abstract InputStream postJSON(String url, Object json) throws Exception;
 }

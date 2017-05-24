@@ -16,11 +16,10 @@ public class HttpPool {
 	
 	private static HttpPool instance;
 	
-	private static int size;
+	private static int size = -1;
 
 	public HttpPool() {
 		pool = new ArrayList<>();
-		size = -1;
 	}
 
     public static void setSize(int size) {
@@ -36,7 +35,7 @@ public class HttpPool {
     }
 
     public static void initialize(Class cls) throws IllegalAccessException, InstantiationException {
-        if (size == -1)
+        if (size <= 0)
             size = POOL_SIZE;
 
         for (int i = 0; i < size; ++i)
@@ -62,6 +61,7 @@ public class HttpPool {
 	}
 
     /**
+     * After finishing with the connection, use connection.setEngaged(false) to return the connection to the pool
      *
      * @return
      */
@@ -104,8 +104,10 @@ public class HttpPool {
 				break;
 		}
 		
-		if (available != null)
+		if (available != null) {
 			available.setCaller(null);
+			available.setEngaged(true);
+		}
 		return available;
 	}
 }
