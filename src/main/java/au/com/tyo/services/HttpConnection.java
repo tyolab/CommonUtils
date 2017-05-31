@@ -588,9 +588,9 @@ public abstract class HttpConnection {
     }
 
     /**
-     *
+     * @param in
      */
-    protected String httpInputStreamToText(InputStream in) throws IOException {
+    public static String httpInputStreamToText(InputStream in) throws IOException {
         return httpInputStreamToText(in, -1);
     }
 
@@ -601,7 +601,18 @@ public abstract class HttpConnection {
      * @return
      * @throws IOException
      */
-    protected String httpInputStreamToText(InputStream in, double contentLength) throws IOException {
+    protected static String httpInputStreamToText(InputStream in, double contentLength) throws IOException {
+        return httpInputStreamToText(in, contentLength, null);
+    }
+
+    /**
+     *
+     * @param in
+     * @param contentLength
+     * @return
+     * @throws IOException
+     */
+    public static String httpInputStreamToText(InputStream in, double contentLength, HttpRequestListener caller) throws IOException {
 
         if (null != in) {
             BufferedReader br = null;
@@ -623,7 +634,7 @@ public abstract class HttpConnection {
 
                 while ((line = br.readLine()) != null)
                 {
-                    if (isCancelled())
+                    if (null != caller && caller.isCancelled())
                         break;
 
                     text.append(line);
@@ -649,7 +660,6 @@ public abstract class HttpConnection {
                 }
                 if (caller != null)
                     caller.onProgressChanged(PROGRESS_MAX);
-                in.close();
                 br.close();
                 return text.toString();
             }

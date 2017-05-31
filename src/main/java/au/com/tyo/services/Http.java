@@ -132,7 +132,9 @@ public class Http extends HttpConnection {
 
             if (in instanceof GZIPInputStream)
                 is.close();
-            }
+
+            in.close();
+        }
         catch (java.lang.IllegalStateException ise) {
             String msg = ise.getMessage();
             if (msg.indexOf("Already connected") < 0)

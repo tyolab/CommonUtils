@@ -15,5 +15,6 @@ public interface HttpRequestListener {
 //	public void setProgress(int progress);
 
 	public void onError();
-	
+
+    boolean isCancelled();
 }
