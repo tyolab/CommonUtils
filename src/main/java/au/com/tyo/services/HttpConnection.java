@@ -432,7 +432,7 @@ public abstract class HttpConnection {
      * @return
      * @throws Exception
      */
-    public String postForString(HttpRequest settings) throws Exception {
+    public String postWithResult(HttpRequest settings) throws Exception {
         return httpInputStreamToText(post(settings, METHOD_POST));
     }
 
@@ -667,7 +667,11 @@ public abstract class HttpConnection {
         return null;
     }
 
-    public abstract void upload(String url, HttpRequest settings) throws Exception;
+    public abstract InputStream upload(String url, HttpRequest settings) throws Exception;
+
+    public String uploadWithResult(String url, HttpRequest settings) throws Exception {
+        return httpInputStreamToText(upload(url, settings));
+    }
 
     public abstract InputStream post(HttpRequest settings, int postMethod) throws Exception;
 

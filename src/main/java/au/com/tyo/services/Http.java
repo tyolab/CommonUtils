@@ -59,13 +59,17 @@ public class Http extends HttpConnection {
 	}
 
     @Override
-	public synchronized void upload(String url, HttpRequest settings) throws Exception {
+	public synchronized InputStream upload(String url, HttpRequest settings) throws Exception {
 		httpConn = (HttpURLConnection) new URL(url).openConnection(); //init(url);
 		String contentType = "multipart/form-data; boundary=" + BOUNDARY;
 		httpConn.setRequestProperty("Content-Type", contentType);
 
-		post(settings, METHOD_POST_MULTIPART_FORM_DATA);
+		return post(settings, METHOD_POST_MULTIPART_FORM_DATA);
 	}
+
+	public String uploadWithResult(String url, HttpRequest settings) throws Exception {
+        return processInputStreamAsString(upload(url, settings));
+    }
 
     @Override
 	public synchronized InputStream post(HttpRequest settings) throws Exception {
@@ -107,11 +111,19 @@ public class Http extends HttpConnection {
 	}
 
 	protected synchronized String connect(HttpRequest settings) throws Exception {
-        InputStream is = connectAsInputStream(settings);
-        InputStream in = null;
 
         if (httpConn == null)
             httpConn = init(settings.getUrl());
+
+        InputStream is = connectAsInputStream(settings);
+        return processInputStreamAsString(is);
+	}
+
+	private String processInputStreamAsString(InputStream is) throws IOException {
+        if (is == null)
+            return null;
+
+        InputStream in = null;
 
         String text = null;
         try {
@@ -147,7 +159,7 @@ public class Http extends HttpConnection {
 //				httpConn.disconnect();
         }
         return text;
-	}
+    }
 
 	protected synchronized InputStream connectAsInputStream(HttpRequest settings) throws Exception {
 
@@ -501,5 +513,10 @@ public class Http extends HttpConnection {
         super.reset();
         setInUsed(false);
         httpConn = null;
+    }
+
+    @Override
+    public String postWithResult(HttpRequest settings) throws Exception {
+        return processInputStreamAsString(post(settings));
     }
 }
