@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class HttpPool {
 
+	private static Class httpConnectionCls = Http.class;
+
 	private static final int POOL_SIZE = 5;
 	private static final int WAIT_FOR_HOW_LONG = 5 * 60 * 1000; // 5 minutes
 	
@@ -22,7 +24,11 @@ public class HttpPool {
 		pool = new ArrayList<>();
 	}
 
-    public static void setSize(int size) {
+	public static void setHttpConnectionClass(Class httpConnectionCls) {
+		HttpPool.httpConnectionCls = httpConnectionCls;
+	}
+
+	public static void setSize(int size) {
         HttpPool.size = size;
     }
 
@@ -30,16 +36,20 @@ public class HttpPool {
 		pool.add(instance);
 	}
 
-	public void addHttpInstanceDefault() {
-        addHttpInstance(new Http());
+	public void addHttpInstanceDefault() throws InstantiationException, IllegalAccessException {
+        initialize();
+	}
+
+	public static HttpConnection createHttpInstanceDefault() throws IllegalAccessException, InstantiationException {
+        return (HttpConnection) httpConnectionCls.newInstance();
     }
 
-    public static void initialize(Class cls) throws IllegalAccessException, InstantiationException {
+    public static void initialize() throws IllegalAccessException, InstantiationException {
         if (size <= 0)
             size = POOL_SIZE;
 
         for (int i = 0; i < size; ++i)
-            getInstance().addHttpInstance((HttpConnection) cls.newInstance());
+            getInstance().addHttpInstance(createHttpInstanceDefault());
     }
 
     /**
@@ -78,9 +88,15 @@ public class HttpPool {
 		HttpConnection available = null;
 		while (available == null) {
             if (pool.size() == 0)
-                addHttpInstanceDefault();
+                try {
+                    addHttpInstanceDefault();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
 
-			for (HttpConnection conn : pool) {
+            for (HttpConnection conn : pool) {
 				if (!conn.isEngaged() && !conn.isInUsed()) {
 					available = conn;
 					break;
@@ -106,8 +122,22 @@ public class HttpPool {
 		
 		if (available != null) {
 			available.setCaller(null);
+            /*
+
+            we shouldn't set it engaged here
 			available.setEngaged(true);
+            */
 		}
+		else {
+            try {
+                available = createHttpInstanceDefault();
+                addHttpInstance(available);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        }
 		return available;
 	}
 }

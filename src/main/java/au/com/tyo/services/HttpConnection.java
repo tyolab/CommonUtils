@@ -254,7 +254,7 @@ public abstract class HttpConnection {
      *
      */
 
-    private boolean engaged;
+    private boolean engaged = false;
 
     public void setEngaged(boolean engaged) {
         this.engaged = engaged;
