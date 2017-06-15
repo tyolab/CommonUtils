@@ -31,8 +31,12 @@ import au.com.tyo.io.IO;
 
 public abstract class HttpConnection {
 
-    public static String DEFAULT_USER_AGENT = "Mozilla/5.0 (Linux; U; en-us; sdk Build/MR1) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0";
-    public static String DEFAULT_USER_AGENT_MOBILE = DEFAULT_USER_AGENT + " Mobile Safari/534.30";
+    public static final String VERSION = "1.0.0";
+
+    public static String DEFAULT_USER_AGENT = "TYODROID/" + VERSION;
+
+    public static String BROWSER_USER_AGENT = DEFAULT_USER_AGENT + " Mozilla/5.0 (Linux; U; en-us; sdk Build/MR1) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0";
+    public static String BROWSER_USER_AGENT_MOBILE = BROWSER_USER_AGENT + " Mobile Safari/534.30";
 
     public static final int METHOD_GET = 1;
     public static final int METHOD_POST = 2;  // x-www-form-urlencoded
@@ -62,7 +66,7 @@ public abstract class HttpConnection {
     protected static String cookiePath = ".";
 
     static {
-        userAgent = DEFAULT_USER_AGENT;
+        userAgent = BROWSER_USER_AGENT;
     }
 
     public static class HttpRequest {
