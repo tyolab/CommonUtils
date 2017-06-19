@@ -140,4 +140,8 @@ public class HttpPool {
         }
 		return available;
 	}
+
+    public static int size() {
+		return getInstance().pool.size();
+    }
 }
