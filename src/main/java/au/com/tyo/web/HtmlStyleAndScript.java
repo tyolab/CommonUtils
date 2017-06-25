@@ -70,7 +70,7 @@ public class HtmlStyleAndScript {
 	private String makeJsPathFile(String special, String name) {
 		String jsPath = "js";
 		if (special != null)
-			jsPath = jsPath + "-" + special;
+			jsPath = jsPath + File.separator + special;
 		return PageBuilder.createJavaScript(path + jsPath + File.separator + name);
 	}
 	
