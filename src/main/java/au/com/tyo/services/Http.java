@@ -86,7 +86,7 @@ public class Http extends HttpConnection {
 		httpConn.setRequestProperty("Cache-Control", "no-cache");
 
 		try {
-			output = connectAsInputStream(settings);
+			output = connectForInputStream(settings);
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -115,7 +115,7 @@ public class Http extends HttpConnection {
         if (httpConn == null)
             httpConn = init(settings.getUrl());
 
-        InputStream is = connectAsInputStream(settings);
+        InputStream is = connectForInputStream(settings);
         return processInputStreamAsString(is);
 	}
 
@@ -161,7 +161,7 @@ public class Http extends HttpConnection {
         return text;
     }
 
-	protected synchronized InputStream connectAsInputStream(HttpRequest settings) throws Exception {
+	protected InputStream connectForInputStream(HttpRequest settings) throws Exception {
 
 		inUsed = true;
 		cancelled = false;
@@ -365,7 +365,7 @@ public class Http extends HttpConnection {
              * let's do it in the simplest way here for now
              */
             if (responseCode >= 300 && responseCode <= 310) {
-                return connectAsInputStream(new HttpRequest(httpConn.getHeaderField("location")));
+                return connectForInputStream(new HttpRequest(httpConn.getHeaderField("location")));
             }
         }
         finally {
