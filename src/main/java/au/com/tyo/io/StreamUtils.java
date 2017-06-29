@@ -6,18 +6,25 @@
 package au.com.tyo.io;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 
 import au.com.tyo.io.FileUtils.Progress;
 
 public class StreamUtils implements IOConstants {
-	
+
+    /**
+     *
+     * @param is
+     * @return
+     */
 	public static String GzipStreamToString(InputStream is) {
 		InputStream gzipStream = null;
 		InputStreamReader reader = null;
@@ -70,6 +77,13 @@ public class StreamUtils implements IOConstants {
 		return sb.toString();
 	}
 
+    /**
+     *
+     * @param in
+     * @param out
+     * @param progress
+     * @param fileSize
+     */
 	public static void GzipStreamToOutputStream(InputStream in, OutputStream out, Progress progress, long fileSize) {
 		GZIPInputStream gzis = null;
 
@@ -103,7 +117,15 @@ public class StreamUtils implements IOConstants {
 				}
 		}
 	}
-	
+
+	/**
+	 *
+	 * @param in
+	 * @param out
+	 * @param progress
+	 * @param fileSize
+	 * @throws IOException
+	 */
 	public static void writeToStreamWithProgress(InputStream in, OutputStream out, Progress progress, long fileSize) throws IOException {
 		double percent = 0.0f;
 		byte[] buffer = new byte[BUFFER_SIZE];
@@ -122,6 +144,23 @@ public class StreamUtils implements IOConstants {
             }
         }
 	}
-	
-	
+
+    /**
+     *
+     * @param text
+     * @return
+     */
+    public static InputStream textToInputStream(String text) {
+        return textToInputStream(text, StandardCharsets.UTF_8);
+    }
+
+    /**
+     *
+     * @param text
+     * @param charset
+     * @return
+     */
+	public static InputStream textToInputStream(String text, Charset charset) {
+        return new ByteArrayInputStream(text.getBytes(charset));
+    }
 }
