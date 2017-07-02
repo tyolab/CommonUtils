@@ -419,6 +419,8 @@ public abstract class HttpConnection {
         return post(new HttpRequest(url));
     }
 
+    protected abstract InputStream connectForInputStream(String url) throws Exception;
+
     /**
      *
      * @param settings
@@ -466,36 +468,7 @@ public abstract class HttpConnection {
         }
     }
 
-    /**
-     *
-     * Should be the same as using curl -R --head  http://www.google.com/doodles/doodles.xml | more
-     *
-     * @param url
-     * @return
-     * @throws MalformedURLException
-     * @throws IOException
-     */
-    public static long getLastModifiedDate(String url) throws MalformedURLException, IOException
-    {
-		/*
-		 * not to use this one
-		 * 		HttpURLConnection.setFollowRedirects(false);
-		 *
-		 */
-        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-        con.setInstanceFollowRedirects(false);
-        con.setRequestMethod("HEAD");
-        con.connect();
 
-		/*long date =*/return con.getLastModified();
-
-//		if (date == 0)
-//			date = con.getDate();
-//
-//		if (date == 0)
-//			return null;
-//		return new Date(date);
-    }
 
     /**
      *
@@ -546,6 +519,8 @@ public abstract class HttpConnection {
         Set<Map.Entry<String, String>> allHeaders = headers.entrySet();
         setHeaders(allHeaders.toArray());
     }
+
+    public abstract long getLastModifiedDate(String url) throws MalformedURLException, IOException;
 
     protected void reset() {
         inUsed = false;
@@ -684,4 +659,8 @@ public abstract class HttpConnection {
     public abstract String getUrl();
 
     public abstract InputStream postJSON(String url, Object json) throws Exception;
+
+    public InputStream getAsInputStream(String url) throws Exception {
+        return connectForInputStream(url);
+    }
 }
