@@ -352,10 +352,6 @@ public abstract class HttpConnection {
                         }
                     }
             }
-//			}
-//			catch (Exception ex){
-//
-//			}
         }
     }
 
