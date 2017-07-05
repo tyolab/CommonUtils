@@ -86,7 +86,7 @@ public class Http extends HttpConnection {
 		httpConn.setRequestProperty("Cache-Control", "no-cache");
 
 		try {
-			output = connectAsInputStream(settings);
+			output = connectForInputStream(settings);
 		}
 		catch (Exception ex) {
 			throw ex;
@@ -115,7 +115,7 @@ public class Http extends HttpConnection {
         if (httpConn == null)
             httpConn = init(settings.getUrl());
 
-        InputStream is = connectAsInputStream(settings);
+        InputStream is = connectForInputStream(settings);
         return processInputStreamAsString(is);
 	}
 
@@ -161,7 +161,23 @@ public class Http extends HttpConnection {
         return text;
     }
 
-	protected synchronized InputStream connectAsInputStream(HttpRequest settings) throws Exception {
+    @Override
+    public InputStream getAsInputStream(String url) throws Exception {
+        return connectForInputStream(new HttpRequest(url));
+    }
+
+    @Override
+    protected InputStream connectForInputStream(String url) throws Exception {
+        return connectForInputStream(new HttpRequest(url));
+    }
+
+    /**
+     *
+     * @param settings
+     * @return
+     * @throws Exception
+     */
+    protected InputStream connectForInputStream(HttpRequest settings) throws Exception {
 
 		inUsed = true;
 		cancelled = false;
@@ -365,7 +381,7 @@ public class Http extends HttpConnection {
              * let's do it in the simplest way here for now
              */
             if (responseCode >= 300 && responseCode <= 310) {
-                return connectAsInputStream(new HttpRequest(httpConn.getHeaderField("location")));
+                return connectForInputStream(new HttpRequest(httpConn.getHeaderField("location")));
             }
         }
         finally {
@@ -507,6 +523,31 @@ public class Http extends HttpConnection {
 	public String getUrl() {
 		return this.httpConn.getURL().toString();
 	}
+
+    /**
+     *
+     * Should be the same as using curl -R --head  http://www.google.com/doodles/doodles.xml | more
+     *
+     * @param url
+     * @return
+     * @throws MalformedURLException
+     * @throws IOException
+     */
+    @Override
+    public long getLastModifiedDate(String url) throws MalformedURLException, IOException
+    {
+		/*
+		 * not to use this one
+		 * 		HttpURLConnection.setFollowRedirects(false);
+		 *
+		 */
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setInstanceFollowRedirects(false);
+        con.setRequestMethod("HEAD");
+        con.connect();
+
+        return con.getLastModified();
+    }
 
     @Override
     protected void reset() {
