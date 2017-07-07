@@ -77,4 +77,30 @@ public class ContentTypes {
 
         return list.contains(fileExt);
     }
+
+    private static boolean isType(String type, String ext) {
+        if (null == ext)
+            return false;
+
+        return type.equals(extensionCheck(ext).toLowerCase());
+    }
+
+    /**
+     *
+     * @param file
+     * @return
+     */
+    public static String getExtension(String file) {
+        int pos = file.lastIndexOf('.');
+        if (pos > -1) {
+            String ext = file.substring(pos);
+            return ext;
+        }
+        return null;
+    }
+
+    public static boolean isSVG(String url) {
+        String ext = getExtension(url);
+        return isType("svg", ext);
+    }
 }
