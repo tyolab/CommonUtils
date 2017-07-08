@@ -19,6 +19,8 @@ public class HtmlStyleAndScript {
 	public static String[] LANDSCAPE_DEPENDANT_CSS = {"image.css"};
 	
 	public static String[] DEVICE_DEPENDANT_JS = {"platform.js"};
+
+	public static String platform = "mobile";
 	
 	private String themeName;
 	
@@ -29,6 +31,7 @@ public class HtmlStyleAndScript {
 	private boolean isTablet;
 	
 	private String device;
+
 
 //	public HtmlStyleAndScript(String path) {
 //		this(path, true, null, false;
@@ -44,8 +47,15 @@ public class HtmlStyleAndScript {
 	}
 	
 	private void buildDeviceDependant(StringBuffer sb, Set<String> set) {
-		for (String str : set)
-			sb.append(this.makeJsPathFile((device != null && device.length() > 0) ? device : null, str));
+        if (platform != null && platform.length() > 0){
+            // platform.js
+            for (String str : set)
+                sb.append(this.makeJsPathFile(platform, str));
+
+            // device specific
+            if (device != null && device.length() > 0)
+                sb.append(this.makeJsPathFile(platform, device + ".js"));
+        }
 	}
 	
 	private void buildThemeDependant(StringBuffer sb, Set<String> themeDependents) {
