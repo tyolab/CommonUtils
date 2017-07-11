@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
@@ -197,7 +198,13 @@ public class IO {
 		    catch(Exception ex) {} 
 		}
 	}
-	
+
+    /**
+     *
+     * @param is
+     * @return
+     * @throws IOException
+     */
 	public static byte[] inputStreamToBytes(InputStream is) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
@@ -221,7 +228,21 @@ public class IO {
 	 * @throws IOException
 	 */
 	public static long writeFile(String tempFile, InputStream is) throws IOException {
-        FileOutputStream fos = new FileOutputStream(new File(tempFile));
+		return writeFile(new File(tempFile), is);
+	}
+
+    /**
+     *
+     * @param tempFile
+     * @param is
+     * @return
+     * @throws IOException
+     */
+	public static long writeFile(File tempFile, InputStream is) throws IOException {
+        if (null == is)
+            return 0;
+
+        FileOutputStream fos = new FileOutputStream(tempFile);
 
         long nread = 0L;
         byte[] buf = new byte[BUFFER_SIZE];
@@ -230,8 +251,15 @@ public class IO {
             fos.write(buf, 0, n);
             nread += n;
         }
+
+        is.close();
         return nread;
 	}
+
+    public static void writeFile(File tempFile, ByteArrayOutputStream os) throws IOException {
+        OutputStream outputStream = new FileOutputStream(tempFile);
+        os.writeTo(outputStream);
+    }
 
 	/**
 	 *
