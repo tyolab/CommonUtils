@@ -10,7 +10,7 @@ public class Internet {
 	public static boolean checkAvailability() throws Exception {
 		boolean responded = false;
 		
-		String[] testList = {"http://www.google.com", "http://www.bing.com", "http://www.yandex.com/", "http://www.soso.com/"};
+		String[] testList = {"https://www.google.com", "http://www.bing.com", "http://www.yandex.com/", "http://www.soso.com/"};
 		
 		for (String url : testList) {
 	        HttpConnection http = HttpPool.getInstance().getConnection();

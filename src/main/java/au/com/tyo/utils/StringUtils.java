@@ -6,6 +6,7 @@
 package au.com.tyo.utils;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -15,10 +16,29 @@ import au.com.tyo.lang.Entities;
 import au.com.tyo.lang.Unicode;
 
 public class StringUtils {
+
+    public static String exceptionStackTraceToString(Exception ex) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        return sw.toString(); // stack trace as a string
+    }
+
+    /**
+     *
+     * @param c
+     * @return
+     */
 	public static String arrayToString(Collection<?> c) {
 		return arrayToString(c, ",");
 	}
-	
+
+    /**
+     *
+     * @param c
+     * @param separator
+     * @return
+     */
 	public static String arrayToString(Collection<?> c, String separator) {
 		StringBuffer buffer = new StringBuffer();
 		for (Object o : c) {

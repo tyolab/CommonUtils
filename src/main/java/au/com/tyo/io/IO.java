@@ -6,6 +6,7 @@
 package au.com.tyo.io;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -290,4 +291,8 @@ public class IO {
 			catch(Exception ex) {}
 		}
 	}
+
+    public static InputStream bytesAsInputStream(byte[] bytes) {
+		return new ByteArrayInputStream(bytes);
+    }
 }

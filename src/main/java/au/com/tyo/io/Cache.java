@@ -18,6 +18,5 @@ public class Cache<FileType> {
 	public void write(FileType target, File file) throws Exception {
 		IO.writeObject(target, file);
 	}
-	
 
 }
