@@ -8,6 +8,11 @@ import java.util.List;
 
 public class ColorUtils {
 
+    /**
+     *
+     * @param color
+     * @return
+     */
     public static int getIntFromColor(List<Float> color) {
         float[] array = new float[color.size()];
         for (int i = 0; i < array.length; ++i)
@@ -15,6 +20,11 @@ public class ColorUtils {
         return getIntFromColor(array);
     }
 
+    /**
+     *
+     * @param color
+     * @return
+     */
     public static int getIntFromColor(float[] color) {
         float r, g, b, alpha;
         r = color[0];
@@ -28,6 +38,25 @@ public class ColorUtils {
         return getIntFromColor(r, g, b, alpha);
     }
 
+    /**
+     *
+     * @param red
+     * @param green
+     * @param blue
+     * @return
+     */
+    public static int getIntFromColor(float red, float green, float blue) {
+        return getIntFromColor(red, green, blue, 1);
+    }
+
+    /**
+     *
+     * @param red
+     * @param green
+     * @param blue
+     * @param alpha
+     * @return
+     */
     public static int getIntFromColor(float red, float green, float blue, float alpha){
         int R = Math.round(255 * red);
         int G = Math.round(255 * green);
@@ -42,6 +71,11 @@ public class ColorUtils {
         return alphaInt | R | G | B;
     }
 
+    /**
+     *
+     * @param color
+     * @return
+     */
     public static String toHexString(int color) {
         return String.format("#%08X", (0xFFFFFFFF & color));
     }
