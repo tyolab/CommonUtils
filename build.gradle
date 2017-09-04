@@ -9,7 +9,7 @@ dependencies {
 
     compile files('libs/json-java-android.jar')
 
-    compile 'org.twitter4j:twitter4j-core:4.0.2'
+    // compile 'org.twitter4j:twitter4j-core:4.0.2'
 }
 
 repositories {
