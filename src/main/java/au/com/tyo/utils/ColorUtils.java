@@ -79,4 +79,18 @@ public class ColorUtils {
     public static String toHexString(int color) {
         return String.format("#%08X", (0xFFFFFFFF & color));
     }
+
+    /**
+     *
+     * @param color1
+     * @param color2
+     * @param distance, (0 - 1)
+     * @return
+     */
+    public static int getGradientColor(float[] color1, float[] color2, float distance) {
+        float R = color1[0] + distance * (color2[0] - color1[0]);
+        float G = color1[1] + distance * (color2[1] - color1[1]);
+        float B = color1[2] + distance * (color2[2] - color1[2]);
+        return getIntFromColor(R, G, B);
+    }
 }
