@@ -12,8 +12,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
-public class DateUtils {
+public class SimpleDateUtils {
 	
 	public static final long ONE_HOUR_IN_MILLIS = 1000 * 60 * 60;
 	
@@ -25,7 +26,7 @@ public class DateUtils {
 	
 	public static final long ONE_WEEK_IN_MILLIS = ONE_DAY_IN_MILLIS * 7;
 
-	private static final SimpleDateFormat JSON_SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+	private static SimpleDateFormat JSON_SIMPLE_DATE_FORMAT;
 
 	public static String[] MONTHS = {
 		"January",
@@ -173,16 +174,104 @@ public class DateUtils {
 	public static String dateToYMD(Date date) {
 		return new SimpleDateFormat("yyyyMMdd", Locale.US).format(date);
 	}
-	
+
+    /**
+     * @param date
+     * @return date format like "Aug 19"
+     */
+    public static String toMMMDD(Date date) {
+        return new SimpleDateFormat("MMM dd", Locale.US).format(date);
+    }
+
+    /**
+     * @param date
+     * @return date format like "12:00 AM"
+     */
+    public static String toTimeIn12HourFormat(Date date) {
+        return new SimpleDateFormat("hh:mm aa", Locale.US).format(date);
+    }
+
+    /**
+     *
+     * @return
+     */
 	public static String todayDateToYMD() {
 		return dateToYMD(Calendar.getInstance().getTime());
 	}
 
+    /**
+     *
+     *  can be formatted into something like "2013-03-11T01:38:18.309Z" / "2013-03-11T01:38:18.309+0000"
+     *
+     * @param date
+     * @return
+     */
 	public static String toJSONDateString(Date date) {
+        if (null == JSON_SIMPLE_DATE_FORMAT)
+            JSON_SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 		return JSON_SIMPLE_DATE_FORMAT.format(date);
 	}
 
+    /**
+     *  can parse both "2013-03-11T01:38:18.309Z" and "2013-03-11T01:38:18.309+0000"
+     *
+     * @param jsonDate
+     * @return
+     * @throws ParseException
+     */
 	public static Date fromJSONDate(String jsonDate) throws ParseException {
+        if (null == JSON_SIMPLE_DATE_FORMAT)
+            JSON_SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 		return JSON_SIMPLE_DATE_FORMAT.parse(jsonDate);
 	}
+
+    /**
+     *
+     * @param date
+     * @param d
+     * @return
+     */
+	public static Date plusHours(Date date, long d) {
+        return new Date(date.getTime() + TimeUnit.HOURS.toMillis(d));
+    }
+
+    /**
+     *
+     * @param date
+     * @param d
+     * @return
+     */
+    public static Date plusDays(Date date, long d) {
+        return new Date(date.getTime() + TimeUnit.DAYS.toMillis(d));
+    }
+
+    /**
+     *
+     * @param date
+     * @param d
+     * @return
+     */
+    public static Date plusMinutes(Date date, long d) {
+        return new Date(date.getTime() + TimeUnit.MINUTES.toMillis(d));
+    }
+
+    /**
+     *
+     * @param date
+     * @return
+     */
+    public static String toMonthYear(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM yyyy");
+        return dateFormat.format(date);
+    }
+
+    /**
+     *
+     * @param date
+     * @return
+     */
+    public static String toDayMonthYear(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("DD MMMM yyyy");
+        return dateFormat.format(date);
+    }
 }
