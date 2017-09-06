@@ -273,4 +273,12 @@ public class StringUtils {
 			list.add(buffer.toString());
 		return list;
 	}
+
+    public static String nullToEmpty(Object str) {
+        if (str instanceof Integer) {
+            int value = (int) str;
+            return -1 == value ? "" : String.valueOf(value);
+        }
+        return null == str ? "" : str.toString();
+    }
 }

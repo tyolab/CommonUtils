@@ -232,7 +232,8 @@ public class SimpleDateUtils {
      * @return
      */
 	public static Date plusHours(Date date, long d) {
-        return new Date(date.getTime() + TimeUnit.HOURS.toMillis(d));
+        long mills = TimeUnit.HOURS.toMillis(d);
+        return new Date(date.getTime() + mills);
     }
 
     /**
