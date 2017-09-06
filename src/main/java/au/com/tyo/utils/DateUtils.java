@@ -25,6 +25,8 @@ public class DateUtils {
 	
 	public static final long ONE_WEEK_IN_MILLIS = ONE_DAY_IN_MILLIS * 7;
 
+	private static final SimpleDateFormat JSON_SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+
 	public static String[] MONTHS = {
 		"January",
 		"February",
@@ -174,5 +176,13 @@ public class DateUtils {
 	
 	public static String todayDateToYMD() {
 		return dateToYMD(Calendar.getInstance().getTime());
+	}
+
+	public static String toJSONDateString(Date date) {
+		return JSON_SIMPLE_DATE_FORMAT.format(date);
+	}
+
+	public static Date fromJSONDate(String jsonDate) throws ParseException {
+		return JSON_SIMPLE_DATE_FORMAT.parse(jsonDate);
 	}
 }
