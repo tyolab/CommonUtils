@@ -119,7 +119,13 @@ public class SimpleDateUtils {
 	public static Calendar parsetDateToCalendar(String what) throws ParseException {
 		return dateToCalendar(parseDate(what));
 	}
-	
+
+	public static Date parseSlashDelimAussieDate(String what) throws ParseException {
+		Date date = null;
+		date = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(what);
+		return date;
+	}
+
 	public static Date parseDate(String what) throws ParseException {
 		Date date = null;
 		try {
@@ -267,12 +273,24 @@ public class SimpleDateUtils {
     }
 
     /**
+     * pattern "DD MMMM yyyy"
      *
      * @param date
      * @return
      */
     public static String toDayMonthYear(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("DD MMMM yyyy");
+        return dateFormat.format(date);
+    }
+
+    /**
+     * pattern "dd/MM/yyyy"
+     *
+     * @param date
+     * @return
+     */
+    public static String toSlashDelimAussieDate(Date date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         return dateFormat.format(date);
     }
 }
