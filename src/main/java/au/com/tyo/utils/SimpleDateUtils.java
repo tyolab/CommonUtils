@@ -293,4 +293,17 @@ public class SimpleDateUtils {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         return dateFormat.format(date);
     }
+
+    public static String toHourMinutsSeconds(long seconds) {
+		int day = (int)TimeUnit.SECONDS.toDays(seconds);
+		long thatHour, thatMinute, thatSecond;
+		thatHour = TimeUnit.SECONDS.toHours(seconds);
+		thatMinute = TimeUnit.SECONDS.toMinutes(seconds);
+		thatSecond = TimeUnit.SECONDS.toSeconds(seconds);
+		long hours = thatHour - (day * 24);
+		long minute = thatMinute - (thatHour * 60);
+		long second = thatSecond - (thatMinute * 60);
+		String text = hours + ":" + minute + ":" + second;
+		return text;
+    }
 }
