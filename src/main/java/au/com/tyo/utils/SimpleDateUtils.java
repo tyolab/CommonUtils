@@ -294,7 +294,7 @@ public class SimpleDateUtils {
         return dateFormat.format(date);
     }
 
-    public static String toHourMinutsSeconds(long seconds) {
+    public static String toHoursMinutesSeconds(long seconds) {
 		int day = (int)TimeUnit.SECONDS.toDays(seconds);
 		long thatHour, thatMinute, thatSecond;
 		thatHour = TimeUnit.SECONDS.toHours(seconds);
