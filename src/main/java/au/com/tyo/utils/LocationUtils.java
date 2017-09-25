@@ -70,11 +70,14 @@ public class LocationUtils {
         return EARTH_RADIUS * c;
     }
 
-    public static LocationPoint findNearest(List<LocationPoint> list, LocationPoint point) {
+    public static LocationPoint findNearest(List list, LocationPoint point) {
         double closest = EEARTH_DIAMETER;
         LocationPoint found = null;
         double[] location1 = new double[] {point.getLatitude(), point.getLongitude()};
-        for (LocationPoint p2 : list) {
+        for ( int i = 0; i < list.size(); ++i) {
+
+            LocationPoint p2 = (LocationPoint) list.get(i);
+
             double[] location2 = new double[] {p2.getLatitude(), p2.getLongitude()};
             double d = distance(location1, location2);
             if (d < closest) {
