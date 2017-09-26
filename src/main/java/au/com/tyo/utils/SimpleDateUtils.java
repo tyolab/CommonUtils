@@ -303,7 +303,7 @@ public class SimpleDateUtils {
 		long hours = thatHour - (day * 24);
 		long minute = thatMinute - (thatHour * 60);
 		long second = thatSecond - (thatMinute * 60);
-		String text = String.format("%02d:%02d:%2d", hours, minute, second);
+		String text = String.format("%02d:%02d:%02d", hours, minute, second);
 		return text;
     }
 }
