@@ -155,10 +155,22 @@ public class SimpleDateUtils {
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
 	}
+
+	public static Calendar getMidnightTime(Calendar oldDate) {
+		Calendar date = (Calendar) oldDate.clone();
+		date.set(Calendar.HOUR_OF_DAY, 23);
+		date.set(Calendar.MINUTE, 60);
+		date.set(Calendar.SECOND, 59);
+		date.set(Calendar.MILLISECOND, 0);
+		return date;
+	}
 	
 	public static Calendar get0000Date(Calendar date) {
 		Calendar newDate = (Calendar) date.clone();
-		setDateToMidnight(newDate);
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
 		return newDate;
 	}
 	
