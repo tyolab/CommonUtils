@@ -214,7 +214,7 @@ public class SimpleDateUtils {
      * @return
      */
 	public static String todayDateToYMD() {
-		return dateToYMD(Calendar.getInstance().getTime());
+		return dateToYMD(Calendar.getInstance(TimeZone.getDefault()).getTime());
 	}
 
     /**
