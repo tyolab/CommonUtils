@@ -33,8 +33,6 @@ public class LocationUtils {
 
         double dfLat = lat2 - lat1;
         double dfLon = degreeToRadian(location2[1] - location1[1]);
-        double lon1 = degreeToRadian(location1[1]);
-        double lon2 = degreeToRadian(location2[1]);
 
         /**
          * rough
