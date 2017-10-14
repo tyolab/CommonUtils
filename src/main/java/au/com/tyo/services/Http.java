@@ -73,17 +73,24 @@ public class Http extends HttpConnection {
 
     @Override
 	public synchronized InputStream post(HttpRequest settings) throws Exception {
-		httpConn = (HttpURLConnection) new URL(settings.getUrl()).openConnection(); //init(url);
-		httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		return post(settings);
+		return post(settings, METHOD_POST, "application/x-www-form-urlencoded");
 	}
 
     @Override
-	public synchronized InputStream post(HttpRequest settings, int postMethod) throws Exception {
+    public synchronized InputStream post(HttpRequest settings, int postMethod) throws Exception {
+        return post(settings, postMethod, "application/x-www-form-urlencoded");
+    }
+
+	public synchronized InputStream post(HttpRequest settings, int postMethod, String contentType) throws Exception {
 		InputStream output = null;
 		setMethod(postMethod);
+
+        httpConn = init(settings.url);
+
 		httpConn.setRequestMethod("POST");
 		httpConn.setRequestProperty("Cache-Control", "no-cache");
+        if (null != contentType)
+            httpConn.setRequestProperty("Content-Type", contentType);
 
 		try {
 			output = connectForInputStream(settings);
@@ -106,8 +113,9 @@ public class Http extends HttpConnection {
 
 	@Override
 	public InputStream postJSON(String url, Object json) throws Exception {
-		httpConn.setRequestProperty("Content-Type", "application/json");
-		return post(new HttpRequest(url), METHOD_POST);
+        HttpRequest request = new HttpRequest(url);
+        request.setContent(json);
+		return post(request, METHOD_POST, "application/json; charset=UTF-8");
 	}
 
 	protected synchronized String connect(HttpRequest settings) throws Exception {
@@ -119,7 +127,7 @@ public class Http extends HttpConnection {
         return processInputStreamAsString(is);
 	}
 
-	private String processInputStreamAsString(InputStream is) throws IOException {
+	public String processInputStreamAsString(InputStream is) throws IOException {
         if (is == null)
             return null;
 
@@ -270,7 +278,7 @@ public class Http extends HttpConnection {
                                     postContent = settings.getContent().toString();
                                 else
                                     postContent = getQuery(settings.getParams());
-                                postData = postContent.getBytes();
+                                postData = postContent.getBytes("UTF-8");
 
                                 httpConn.setRequestProperty("Content-Length", Integer.toString(postData.length));
                                 //			BufferedWriter writer = new BufferedWriter(
@@ -395,7 +403,8 @@ public class Http extends HttpConnection {
             if (null != os)
                 os.close();
 
-            reset();
+            // no, not to reset yet, as the we still need the information from the connection
+            // reset();
         }
 
         return is;

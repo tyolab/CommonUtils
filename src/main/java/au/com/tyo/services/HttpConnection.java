@@ -29,7 +29,7 @@ import au.com.tyo.io.IO;
  * Created by Eric Tang (eric.tang@tyo.com.au) on 16/5/17.
  */
 
-public abstract class HttpConnection {
+public abstract class HttpConnection<T extends HttpConnection> {
 
     public static final String VERSION = "1.0.0";
 
@@ -64,6 +64,8 @@ public abstract class HttpConnection {
     protected static String userAgent;
 
     protected static String cookiePath = ".";
+
+    private T impl;
 
     static {
         userAgent = BROWSER_USER_AGENT;
@@ -159,7 +161,7 @@ public abstract class HttpConnection {
         }
 
         public boolean hasParams() {
-            return null != params && params.size() > 0;
+            return null != content || (null != params && params.size() > 0);
         }
 
         public String toUrlEncodedString() throws UnsupportedEncodingException {
@@ -505,6 +507,8 @@ public abstract class HttpConnection {
      * @param value
      */
     public void setHeader(String header, String value) {
+        if (null == headers)
+            headers = new HashMap<String, String>();
         headers.put(header, value);
     }
 
@@ -658,5 +662,9 @@ public abstract class HttpConnection {
 
     public InputStream getAsInputStream(String url) throws Exception {
         return connectForInputStream(url);
+    }
+
+    public T getImpl() {
+        return impl;
     }
 }

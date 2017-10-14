@@ -18,6 +18,8 @@ import au.com.tyo.lang.Unicode;
 public class StringUtils {
 
     public static String exceptionStackTraceToString(Exception ex) {
+        if (null == ex)
+            return "";
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         ex.printStackTrace(pw);
