@@ -318,4 +318,12 @@ public class SimpleDateUtils {
 		String text = String.format("%02d:%02d:%02d", hours, minute, second);
 		return text;
     }
+
+	public static String toHoursMinutes(double hours) {
+		int intHours = (int) Math.floor(hours);
+		double dMins = hours - intHours;
+		int minutes = (int) (dMins * 60);
+		String text = String.format("%d:%02d", intHours, minutes);
+		return text;
+	}
 }
