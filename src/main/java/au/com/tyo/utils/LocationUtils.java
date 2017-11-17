@@ -140,7 +140,7 @@ public class LocationUtils {
             double[] location2 = new double[] {p2.getLatitude(), p2.getLongitude()};
             double d = distance(location1, location2);
 
-            tempList.add(new ComparableLocationPoint(point, d));
+            tempList.add(new ComparableLocationPoint(p2, d));
         }
 
         Collections.sort(tempList);
