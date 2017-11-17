@@ -1,5 +1,7 @@
 package au.com.tyo.utils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,6 +16,47 @@ public class LocationUtils {
     public interface LocationPoint {
         double getLongitude();
         double getLatitude();
+    }
+
+    public static class ComparableLocationPoint implements Comparable {
+
+        private LocationPoint locationPoint;
+
+        public ComparableLocationPoint(LocationPoint locationPoint) {
+            this.locationPoint = locationPoint;
+        }
+
+        public ComparableLocationPoint(LocationPoint locationPoint, double distanceToBasePoint) {
+            this.locationPoint = locationPoint;
+            this.distanceToBasePoint = distanceToBasePoint;
+        }
+
+        private double distanceToBasePoint = 0;
+
+        public double getDistanceToBasePoint() {
+            return distanceToBasePoint;
+        }
+
+        public void setDistanceToBasePoint(double distanceToBasePoint) {
+            this.distanceToBasePoint = distanceToBasePoint;
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            ComparableLocationPoint point2 = (ComparableLocationPoint) o;
+
+            double d1 = getDistanceToBasePoint();
+            double d2 = point2.getDistanceToBasePoint();
+            if (d1 == d2)
+                return 0;
+            else if (d1 < d2)
+                return -1;
+            return 1;
+        }
+
+        public LocationPoint getLocationPoint() {
+            return locationPoint;
+        }
     }
 
     public static double degreeToRadian(double degree) {
@@ -84,6 +127,36 @@ public class LocationUtils {
             }
         }
         return found;
+    }
+
+    public static List<ComparableLocationPoint> findNearestComparablePoints(List list, LocationPoint point) {
+        List<ComparableLocationPoint> tempList = new ArrayList();
+
+        double[] location1 = new double[] {point.getLatitude(), point.getLongitude()};
+        for ( int i = 0; i < list.size(); ++i) {
+
+            LocationPoint p2 = (LocationPoint) list.get(i);
+
+            double[] location2 = new double[] {p2.getLatitude(), p2.getLongitude()};
+            double d = distance(location1, location2);
+
+            tempList.add(new ComparableLocationPoint(point, d));
+        }
+
+        Collections.sort(tempList);
+
+        return tempList;
+    }
+
+    public static List<LocationPoint> findNearests(List list, LocationPoint point) {
+        List<ComparableLocationPoint> tempList = findNearestComparablePoints(list, point);
+
+        List targetList = new ArrayList();
+        for (ComparableLocationPoint sortedPoint : tempList) {
+            targetList.add(sortedPoint.getLocationPoint());
+        }
+
+        return targetList;
     }
 }
 
