@@ -320,10 +320,28 @@ public class SimpleDateUtils {
     }
 
 	public static String toHoursMinutes(double hours) {
+		int[] array = toHoursMinutesArray(hours);
+		return toHoursMinutes(array);
+	}
+
+	public static String toHoursMinutes(int[] array) {
+		String text = String.format("%d:%02d", array[0], array[1]);
+		return text;
+	}
+
+	public static int[] toHoursMinutesArray(double hours) {
 		int intHours = (int) Math.floor(hours);
 		double dMins = hours - intHours;
 		int minutes = (int) (dMins * 60);
-		String text = String.format("%d:%02d", intHours, minutes);
-		return text;
+		return new int[] {intHours, minutes};
+	}
+
+	public static int[] plusHoursMinuts(int[] a1, int[] a2) {
+		int hours = a1[0] + a2[0];
+		int mins = a1[1] + a2[1];
+
+		int extra = mins / 60;
+		int finalMins = mins % 60;
+		return new int[] {hours + extra, finalMins};
 	}
 }
