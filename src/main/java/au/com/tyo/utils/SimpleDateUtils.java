@@ -336,12 +336,20 @@ public class SimpleDateUtils {
 		return new int[] {intHours, minutes};
 	}
 
-	public static int[] plusHoursMinuts(int[] a1, int[] a2) {
+	public static int[] plusHoursMinutes(int[] a1, int[] a2) {
 		int hours = a1[0] + a2[0];
 		int mins = a1[1] + a2[1];
 
 		int extra = mins / 60;
 		int finalMins = mins % 60;
 		return new int[] {hours + extra, finalMins};
+	}
+
+	public static int[] plusHoursMinutes(double hours1, double hours2) {
+		int[] a1, a2;
+		a1 = toHoursMinutesArray(hours1);
+		a2 = toHoursMinutesArray(hours2);
+
+        return plusHoursMinutes(a1, a2);
 	}
 }
