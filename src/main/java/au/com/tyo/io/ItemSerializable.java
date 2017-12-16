@@ -13,17 +13,34 @@ import java.io.Serializable;
 
 public abstract class ItemSerializable implements Serializable {
 
+    private static final long serialVersionUID = 4642611318679780699L;
+
     public abstract void serialise(ObjectOutputStream stream) throws IOException;
 
     public abstract void deserialise(ObjectInputStream stream) throws IOException, ClassNotFoundException;
 
-    public void writeObject(java.io.ObjectOutputStream stream)
+    /**
+     *
+     * Has to be exact like this
+     *
+     * @param stream
+     * @throws IOException
+     */
+    private void writeObject(java.io.ObjectOutputStream stream)
             throws IOException {
         stream.defaultWriteObject();
         serialise(stream);
     }
 
-    public void readObject(java.io.ObjectInputStream stream)
+    /**
+     *
+     * Has to be exact like this
+     *
+     * @param stream
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void readObject(java.io.ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
         deserialise(stream);
