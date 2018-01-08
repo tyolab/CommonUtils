@@ -9,30 +9,35 @@ import java.util.ArrayList;
 
 public class HttpPool {
 
-	private static Class httpConnectionCls = Http.class;
+	private static Class httpConnectionCls = null; // HttpJavaNet.class;
 
 	private static final int POOL_SIZE = 5;
 	private static final int WAIT_FOR_HOW_LONG = 5 * 60 * 1000; // 5 minutes
 	
-	private ArrayList<HttpConnection> pool;
+	private static ArrayList<HttpConnection> pool;
 	
 	private static HttpPool instance;
 	
 	private static int size = -1;
 
 	public HttpPool() {
-		pool = new ArrayList<>();
 	}
 
 	public static void setHttpConnectionClass(Class httpConnectionCls) {
 		HttpPool.httpConnectionCls = httpConnectionCls;
 	}
 
+	public static boolean hasSetHttpConnectionClass() {
+	    return null != httpConnectionCls;
+    }
+
 	public static void setSize(int size) {
         HttpPool.size = size;
     }
 
-    public void addHttpInstance(HttpConnection instance) {
+    public static void addHttpInstance(HttpConnection instance) {
+	    if (null == pool)
+            pool = new ArrayList<>();
 		pool.add(instance);
 	}
 
@@ -44,13 +49,13 @@ public class HttpPool {
         return (HttpConnection) httpConnectionCls.newInstance();
     }
 
-    public static void initialize() throws IllegalAccessException, InstantiationException {
+    public static void initialize() throws InstantiationException, IllegalAccessException {
         if (size <= 0)
             size = POOL_SIZE;
 
         for (int i = 0; i < size; ++i)
-            getInstance().addHttpInstance(createHttpInstanceDefault());
-    }
+            addHttpInstance(createHttpInstanceDefault());
+	}
 
     /**
      *
@@ -76,6 +81,9 @@ public class HttpPool {
      * @return
      */
 	public static synchronized HttpConnection getConnection() {
+//		if (null == pool || pool.size() == 0)
+//			initialize();
+
 		return getInstance().getConnectionInternal();
 	}
 
@@ -104,7 +112,7 @@ public class HttpPool {
 			}
 
 			if (available == null && pool.size() < size) {
-				available = new Http();
+				available = new HttpJavaNet();
 				pool.add(available);
 			}
 

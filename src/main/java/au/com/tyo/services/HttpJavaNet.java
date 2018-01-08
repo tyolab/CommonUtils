@@ -25,12 +25,12 @@ import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
-public class Http extends HttpConnection {
+public class HttpJavaNet extends HttpConnection {
 
 	//    private URLConnection connection = null;
 	private HttpURLConnection httpConn = null;
 
-	public Http() {
+	public HttpJavaNet() {
 		headers = new HashMap<String, String>();
 //		cookieFile = null;
 	}
@@ -117,6 +117,12 @@ public class Http extends HttpConnection {
         request.setContent(json);
 		return post(request, METHOD_POST, "application/json; charset=UTF-8");
 	}
+
+	@Override
+	public String postJSONForResult(String url, String json) throws Exception {
+        InputStream is = postJSON(url, json);
+        return processInputStreamAsString(is);
+    }
 
 	protected synchronized String connect(HttpRequest settings) throws Exception {
 
@@ -566,7 +572,7 @@ public class Http extends HttpConnection {
     }
 
     @Override
-    public String postWithResult(HttpRequest settings) throws Exception {
+    public String postForResult(HttpRequest settings) throws Exception {
         return processInputStreamAsString(post(settings));
     }
 }

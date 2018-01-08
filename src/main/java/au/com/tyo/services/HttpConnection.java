@@ -436,7 +436,7 @@ public abstract class HttpConnection<T extends HttpConnection> {
      * @return
      * @throws Exception
      */
-    public String postWithResult(HttpRequest settings) throws Exception {
+    public String postForResult(HttpRequest settings) throws Exception {
         return httpInputStreamToText(post(settings, METHOD_POST));
     }
 
@@ -659,6 +659,8 @@ public abstract class HttpConnection<T extends HttpConnection> {
     public abstract String getUrl();
 
     public abstract InputStream postJSON(String url, Object json) throws Exception;
+
+    public abstract String postJSONForResult(String url, String json) throws Exception;
 
     public InputStream getAsInputStream(String url) throws Exception {
         return connectForInputStream(url);
