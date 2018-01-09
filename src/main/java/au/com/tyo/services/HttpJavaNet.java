@@ -125,10 +125,6 @@ public class HttpJavaNet extends HttpConnection {
     }
 
 	protected synchronized String connect(HttpRequest settings) throws Exception {
-
-        if (httpConn == null)
-            httpConn = init(settings.getUrl());
-
         InputStream is = connectForInputStream(settings);
         return processInputStreamAsString(is);
 	}
@@ -192,6 +188,8 @@ public class HttpJavaNet extends HttpConnection {
      * @throws Exception
      */
     protected InputStream connectForInputStream(HttpRequest settings) throws Exception {
+        if (httpConn == null)
+            httpConn = init(settings.getUrl());
 
 		inUsed = true;
 		cancelled = false;
