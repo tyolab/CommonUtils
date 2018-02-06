@@ -18,6 +18,9 @@ import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /*
  * the below code is from:
@@ -238,5 +241,27 @@ public class FileUtils implements IOConstants {
 		}
 
 		if (!f.delete()) throw new FileNotFoundException("Failed to delete file: " + f);
+	}
+
+	public static List<File> sortByLastModified(List files) {
+		return sortByLastModified(files, false);
+	}
+
+	public static List<File> sortByLastModified(List files, boolean accendingOrder) {
+		Collections.sort(files, new Comparator<File>() {
+			public int compare(File f1, File f2) {
+				long m1 = f1.lastModified();
+				long m2 = f2.lastModified();
+
+				int v = accendingOrder ? 1 : -1;
+
+				if (m1 == m2)
+					return 0;
+				else if (m1 > m2)
+					return v * -1;
+				return v;
+			}
+		});
+		return files;
 	}
 }
