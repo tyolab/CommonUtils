@@ -42,15 +42,33 @@ public class StringUtils {
      * @return
      */
 	public static String arrayToString(Collection<?> c, String separator) {
+	    return arrayToString(c.toArray(), separator);
+    }
+
+    public static String arrayToString(Object[] c, String separator) {
 		StringBuffer buffer = new StringBuffer();
 		for (Object o : c) {
+		    if (o == null)
+		        continue;
+
+		    if (o instanceof String && ((String) o).length() == 0)
+		        continue;
+
 			if (buffer.length() > 0)
 				buffer.append(separator);
 			buffer.append(o.toString());
 		}
 		return buffer.toString();
 	}
-	
+
+	public static String join(Object[] c, String separator) {
+	    return arrayToString(c, separator);
+    }
+
+    public static String join(String separator, Object... params) {
+        return join(params, separator);
+    }
+
 	/*
 	 * Can't remember which version is from
 	 * 

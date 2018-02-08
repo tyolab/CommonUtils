@@ -49,6 +49,8 @@ public class SpreadSheet {
     private boolean simpleTable;
     private boolean ignoreEmptyCell;
 
+    private int ignoreRowNonNullColumnsLessThanThisNumber = -1;
+
     private int type;
 
     private String delimiter;
@@ -75,6 +77,14 @@ public class SpreadSheet {
 
         simpleTable = false;
         ignoreEmptyCell = true;
+    }
+
+    public int getIgnoreRowNonNullColumnsLessThanThisNumber() {
+        return ignoreRowNonNullColumnsLessThanThisNumber;
+    }
+
+    public void setIgnoreRowNonNullColumnsLessThanThisNumber(int ignoreRowNonNullColumnsLessThanThisNumber) {
+        this.ignoreRowNonNullColumnsLessThanThisNumber = ignoreRowNonNullColumnsLessThanThisNumber;
     }
 
     public List<List> getTable() {
@@ -126,6 +136,8 @@ public class SpreadSheet {
 
             String[] cols = line.split(delimiter);
             String buffer = "";
+            int emptyCellCount = 0;
+
             if (cols.length > 1) {
 
                 // check the column count
@@ -134,7 +146,9 @@ public class SpreadSheet {
 
                 for (int j = 0; j < cols.length; ++j) {
                     String colStr = cols[j];
-                    if (null == colStr || colStr.trim().length() == 0) {
+                    if (null == colStr || (colStr = colStr.trim()).length() == 0) {
+                        ++emptyCellCount;
+
                         if (null != spreadSheetWatcher)
                             spreadSheetWatcher.onEmptyCell(i, j);
                         if (ignoreEmptyCell)
@@ -161,6 +175,9 @@ public class SpreadSheet {
             }
 
             if (row != null) {
+                if (ignoreRowNonNullColumnsLessThanThisNumber > -1 && ignoreRowNonNullColumnsLessThanThisNumber > (cols.length - emptyCellCount))
+                    continue;
+
                 if (table == null)
                     table = new ArrayList<>();
                 table.add(row);
