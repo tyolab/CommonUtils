@@ -95,7 +95,7 @@ public class HttpPool {
 		long start = System.nanoTime();
 		HttpConnection available = null;
 		while (available == null) {
-            if (pool.size() == 0)
+            if (null == pool || pool.size() == 0)
                 try {
                     addHttpInstanceDefault();
                 } catch (InstantiationException e) {
