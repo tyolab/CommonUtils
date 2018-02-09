@@ -17,7 +17,9 @@
 package au.com.tyo.utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Eric Tang (eric.tang@tyo.com.au) on 7/2/18.
@@ -48,6 +50,7 @@ public class SpreadSheet {
 
     private boolean simpleTable;
     private boolean ignoreEmptyCell;
+    private boolean firstRowIsHeader;
 
     private int ignoreRowNonNullColumnsLessThanThisNumber = -1;
 
@@ -60,6 +63,8 @@ public class SpreadSheet {
     private SpreadSheetWatcher spreadSheetWatcher;
 
     private int columnCount = 0;
+
+    private List<String> headers;
 
     public SpreadSheet(int type) {
         this.type = type;
@@ -77,6 +82,18 @@ public class SpreadSheet {
 
         simpleTable = false;
         ignoreEmptyCell = true;
+    }
+
+    public List<String> getHeaders() {
+        return headers;
+    }
+
+    public boolean isFirstRowIsHeader() {
+        return firstRowIsHeader;
+    }
+
+    public void setFirstRowIsHeader(boolean firstRowIsHeader) {
+        this.firstRowIsHeader = firstRowIsHeader;
     }
 
     public int getIgnoreRowNonNullColumnsLessThanThisNumber() {
@@ -175,16 +192,28 @@ public class SpreadSheet {
             }
 
             if (row != null && (row.size() > 0)) {
-                if (ignoreRowNonNullColumnsLessThanThisNumber > -1 &&
-                        (cols.length < ignoreRowNonNullColumnsLessThanThisNumber ||
-                                ignoreRowNonNullColumnsLessThanThisNumber > (cols.length - emptyCellCount)
-                        ))
-                    continue;
+                if (i == 0 && firstRowIsHeader)
+                    headers = row;
+                else {
+                    if (ignoreRowNonNullColumnsLessThanThisNumber > -1 &&
+                            (cols.length < ignoreRowNonNullColumnsLessThanThisNumber ||
+                                    ignoreRowNonNullColumnsLessThanThisNumber > (cols.length - emptyCellCount)
+                            ))
+                        continue;
 
-                if (table == null)
-                    table = new ArrayList<>();
-                table.add(row);
+                    if (table == null)
+                        table = new ArrayList<>();
+                    table.add(row);
+                }
             }
         }
+    }
+
+    public void reOrganizeTableWithValidHeaders() {
+        Set ignorSet = new HashSet<>();
+        List<List> nt = new ArrayList<>();
+
+        // TODO
+        // finish it
     }
 }
