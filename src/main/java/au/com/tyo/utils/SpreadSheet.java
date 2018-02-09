@@ -174,8 +174,11 @@ public class SpreadSheet {
                 }
             }
 
-            if (row != null) {
-                if (ignoreRowNonNullColumnsLessThanThisNumber > -1 && ignoreRowNonNullColumnsLessThanThisNumber > (cols.length - emptyCellCount))
+            if (row != null && (row.size() > 0)) {
+                if (ignoreRowNonNullColumnsLessThanThisNumber > -1 &&
+                        (cols.length < ignoreRowNonNullColumnsLessThanThisNumber ||
+                                ignoreRowNonNullColumnsLessThanThisNumber > (cols.length - emptyCellCount)
+                        ))
                     continue;
 
                 if (table == null)
