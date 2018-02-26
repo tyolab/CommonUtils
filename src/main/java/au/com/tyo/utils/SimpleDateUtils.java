@@ -319,24 +319,29 @@ public class SimpleDateUtils {
 		return text;
     }
 
-	public static String toHoursMinutes(double hours) {
-		int[] array = toHoursMinutesArray(hours);
-		return toHoursMinutes(array);
+	public static String toMinutesSeconds(double duration) {
+		int[] array = toTimeArray(duration);
+		return toTimeString(array);
 	}
 
-	public static String toHoursMinutes(int[] array) {
+	public static String toHoursMinutes(double duration) {
+		int[] array = toTimeArray(duration);
+		return toTimeString(array);
+	}
+
+	public static String toTimeString(int[] array) {
 		String text = String.format("%d:%02d", array[0], array[1]);
 		return text;
 	}
 
-	public static int[] toHoursMinutesArray(double hours) {
+	public static int[] toTimeArray(double hours) {
 		int intHours = (int) Math.floor(hours);
 		double dMins = hours - intHours;
 		int minutes = (int) (dMins * 60);
 		return new int[] {intHours, minutes};
 	}
 
-	public static int[] plusHoursMinutes(int[] a1, int[] a2) {
+	public static int[] plusTime(int[] a1, int[] a2) {
 		int hours = a1[0] + a2[0];
 		int mins = a1[1] + a2[1];
 
@@ -345,11 +350,11 @@ public class SimpleDateUtils {
 		return new int[] {hours + extra, finalMins};
 	}
 
-	public static int[] plusHoursMinutes(double hours1, double hours2) {
+	public static int[] plusTime(double hours1, double hours2) {
 		int[] a1, a2;
-		a1 = toHoursMinutesArray(hours1);
-		a2 = toHoursMinutesArray(hours2);
+		a1 = toTimeArray(hours1);
+		a2 = toTimeArray(hours2);
 
-        return plusHoursMinutes(a1, a2);
+        return plusTime(a1, a2);
 	}
 }
