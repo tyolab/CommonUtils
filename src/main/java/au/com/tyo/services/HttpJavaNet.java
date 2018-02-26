@@ -40,15 +40,11 @@ public class HttpJavaNet extends HttpConnection {
         return createCookieFile(httpConn.getURL().getHost());
     }
 	
-	public synchronized HttpURLConnection init(String url) {
+	public synchronized HttpURLConnection init(String url) throws IOException {
 		URLConnection connection = null;
-		try {
-			connection = new URL(url).openConnection();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+        connection = new URL(url).openConnection();
+
 		return 	(HttpURLConnection)connection;
 	}
 
@@ -190,6 +186,9 @@ public class HttpJavaNet extends HttpConnection {
     protected InputStream connectForInputStream(HttpRequest settings) throws Exception {
         if (httpConn == null)
             httpConn = init(settings.getUrl());
+
+        if (httpConn == null)
+            return null;
 
 		inUsed = true;
 		cancelled = false;
