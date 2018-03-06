@@ -114,7 +114,18 @@ public class TextUtils {
 		// if more than 2
 		return removeSpaces(abs, 2);
 	}
-	
+
+	public static String padRightWith(String s, char with, int n) {
+		if (s.length() > n)
+			return s;
+		return String.format("%1$-" + n + "s", s).replace(' ', with);
+	}
+
+	public static String padLeftWith(String s, char with, int n) {
+		if (s.length() > n)
+			return s;
+		return String.format("%1$" + n + "s", s).replace(' ', with);
+	}
 //	public static boolean isWithinDistance(List<Integer> list, int distance) {
 //		int array = list.toArray();
 //		Arrays.sort(list);
