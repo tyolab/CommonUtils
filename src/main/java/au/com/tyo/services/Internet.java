@@ -19,8 +19,8 @@ public class Internet {
 				http.get(url);
 	            responded = true;
 	            break;
-	        } 
-	        catch (Exception e) 
+	        }
+	        catch (Exception e)
 	        {
 	        	throw e;
 	        }
