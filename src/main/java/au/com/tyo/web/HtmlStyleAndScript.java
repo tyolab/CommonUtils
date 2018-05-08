@@ -14,11 +14,11 @@ public class HtmlStyleAndScript {
 	
 	public static String[] STYLES_N_SCRIPTS = {"styles.css", "common.js"};
 	
-	public static String[] THEME_DEPENDANT_CSS = {"theme.css"};
+	public static String[] THEME_DEPENDANT_CSS = {"min.css"};
 	
-	public static String[] LANDSCAPE_DEPENDANT_CSS = {"image.css"};
+	public static String[] LANDSCAPE_DEPENDANT_CSS = {/*"image.css"*/};
 	
-	public static String[] DEVICE_DEPENDANT_JS = {"platform.js"};
+	public static String[] DEVICE_DEPENDANT_JS = {/*"platform.js"*/};
 
 	public static String platform = "mobile";
 	
@@ -53,14 +53,18 @@ public class HtmlStyleAndScript {
                 sb.append(this.makeJsPathFile(platform, str));
 
             // device specific
+            // not to worry for now
             if (device != null && device.length() > 0)
                 sb.append(this.makeJsPathFile(platform, device + ".js"));
         }
 	}
 	
 	private void buildThemeDependant(StringBuffer sb, Set<String> themeDependents) {
-		for (String str : themeDependents) 
-			sb.append(this.makeCssPathFile((themeName != null && themeName.length() > 0) ? themeName : null, str));
+		if (themeDependents.size() > 0)
+			for (String str : themeDependents)
+				sb.append(this.makeCssPathFile((themeName != null && themeName.length() > 0) ? themeName : null, str));
+		else
+			sb.append(this.makeCssPathFile((themeName != null && themeName.length() > 0) ? themeName : null, "min.css"));
 	}
 	
 	private void buildWideScreenDependant(StringBuffer sb, Set<String> orientationDependents) {
@@ -83,20 +87,29 @@ public class HtmlStyleAndScript {
 			jsPath = jsPath + File.separator + special;
 		return PageBuilder.createJavaScript(path + jsPath + File.separator + name);
 	}
-	
+
+	/**
+	 * All CSS files are stored in the same place now
+	 * i.e. file:///shared_assets/tyokiie/css
+	 *
+	 * @param special
+	 * @param name
+	 * @return
+	 */
 	private String makeCssPathFile(String special, String name) {
+		String cssPath = path  + "css";
 		if (special != null)
-			return	PageBuilder.createCss(path + "css-" + special + File.separator + name); 
-		return PageBuilder.createCss(path + "css" + File.separator + name);
+			return	PageBuilder.createCss(cssPath + File.separator + "css-" + special + "." + name);
+		return PageBuilder.createCss( cssPath+ File.separator + name);
 	}
 	
 	public String build(String[] stylesAndScripts, String[] themeCss,
-			String[] orientationDependents, String inlineCss, String[] deviceDepdendents) {
+			String[] orientationDependents, String inlineCss, String[] deviceDependents) {
 		return build(stylesAndScripts, 
 				themeCss != null ? new HashSet<String>(Arrays.asList(themeCss)) : null, 
 				orientationDependents != null ? new HashSet<String>(Arrays.asList(orientationDependents)) : null, 
 				inlineCss,
-				deviceDepdendents != null ? new HashSet<String>(Arrays.asList(deviceDepdendents)) : null);
+				deviceDependents != null ? new HashSet<String>(Arrays.asList(deviceDependents)) : null);
 	}
 	
 	public String build(String[] stylesAndScripts, Set<String> themeDependents, Set<String> orientationDependents, String inlineCss, Set<String> deviceDepdendents) {
@@ -115,8 +128,9 @@ public class HtmlStyleAndScript {
 					sb.append(PageBuilder.createJavaScript(path + "js" + File.separator + what));
 			}
 //			this.buildStylesAndScripts(sb, stylesAndScripts);
-		
-		this.buildThemeDependant(sb, new HashSet<String>(Arrays.asList(THEME_DEPENDANT_CSS)));
+
+        // duplicated
+		// this.buildThemeDependant(sb, new HashSet<String>(Arrays.asList(THEME_DEPENDANT_CSS)));
 		if (themeDependents != null)
 			this.buildThemeDependant(sb, themeDependents);
 		
@@ -126,9 +140,10 @@ public class HtmlStyleAndScript {
 		
 		if (inlineCss != null)
 			createStlyeElement(sb, inlineCss);
-		
-		if (deviceDepdendents != null)
-			this.buildDeviceDependant(sb, deviceDepdendents);
+
+		// no needs for now
+//		if (deviceDepdendents != null)
+//			this.buildDeviceDependant(sb, deviceDepdendents);
 		
 		return sb.toString();
 	}

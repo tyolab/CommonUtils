@@ -5,6 +5,8 @@
 
 package au.com.tyo.web;
 
+import java.io.File;
+
 import au.com.tyo.CommonSettings;
 
 public class PageBuilder {
@@ -13,7 +15,11 @@ public class PageBuilder {
 	
 	public static final String HTML_SECTION_DIV_END = "</div>\n";
 	
-	public static final String ASSETS_PATH_ANDROID = "file:///android_asset/";
+	public static final String ASSETS_PATH_ANDROID = "file:///android_asset";
+
+	public static final String HTML_STATIC_PATH = "tyokiie";
+
+	public static final String HTML_ASSETS_ANDROID = ASSETS_PATH_ANDROID + File.separator + HTML_STATIC_PATH + File.separator;
 	
 	public static String html_page_parameters = ""; 
 	
@@ -29,7 +35,15 @@ public class PageBuilder {
 	public static String getAndroidAssetPath() {
 		return ASSETS_PATH_ANDROID;
 	}
-	
+
+	public static String getHtmlStaticPath() {
+		return HTML_STATIC_PATH;
+	}
+
+	public static String getHtmlAssetsAndroid() {
+		return HTML_ASSETS_ANDROID;
+	}
+
 	public static String addAndroidAssetPath(String file) {
 		return String.format("file:///android_asset/%s", file);
 	}
@@ -46,10 +60,12 @@ public class PageBuilder {
         if (null == getHtmlTemplate())
             return toHtmlWithEmbeddedTemplate(page);
         else {
-            String temp = getHtmlTemplate();
-            temp = temp.replaceFirst("%html_attibutes%", createHtmlAttributes(page));
-            temp = temp.replaceFirst("%title%", page.getTitle());
-            temp = temp.replaceFirst("%body%", page.createHtmlContent());
+            String temp = getHtmlTemplate().replaceAll("tyokiie/", HTML_ASSETS_ANDROID);
+			temp = String.format(temp,
+                    createHtmlAttributes(page),
+                    page.createStyleAndScript(),
+                    page.getTitle(),
+                    page.createHtmlContent());
             return temp;
         }
 	}
