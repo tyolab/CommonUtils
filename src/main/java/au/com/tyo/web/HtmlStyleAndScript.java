@@ -14,7 +14,7 @@ public class HtmlStyleAndScript {
 	
 	public static String[] STYLES_N_SCRIPTS = {"styles.css", "common.js"};
 	
-	public static String[] THEME_DEPENDANT_CSS = {"min.css"};
+	public static String[] THEME_DEPENDANT_CSS = {};
 	
 	public static String[] LANDSCAPE_DEPENDANT_CSS = {/*"image.css"*/};
 	
@@ -64,7 +64,7 @@ public class HtmlStyleAndScript {
 			for (String str : themeDependents)
 				sb.append(this.makeCssPathFile((themeName != null && themeName.length() > 0) ? themeName : null, str));
 		else
-			sb.append(this.makeCssPathFile((themeName != null && themeName.length() > 0) ? themeName : null, "min.css"));
+			sb.append(this.makeCssPathFile((themeName != null && themeName.length() > 0) ? themeName : null, "css"));
 	}
 	
 	private void buildWideScreenDependant(StringBuffer sb, Set<String> orientationDependents) {
@@ -99,7 +99,7 @@ public class HtmlStyleAndScript {
 	private String makeCssPathFile(String special, String name) {
 		String cssPath = path  + "css";
 		if (special != null)
-			return	PageBuilder.createCss(cssPath + File.separator + "css-" + special + "." + name);
+			return	PageBuilder.createCss(cssPath + File.separator + special + "-" + name);
 		return PageBuilder.createCss( cssPath+ File.separator + name);
 	}
 	
