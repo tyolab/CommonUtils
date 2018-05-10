@@ -62,6 +62,7 @@ public class PageBuilder {
         else {
             String temp = getHtmlTemplate().replaceAll("tyokiie/", HTML_ASSETS_ANDROID);
 			temp = String.format(temp,
+					page.getLangCode(),
                     createHtmlAttributes(page),
                     page.createStyleAndScript(),
                     page.getTitle(),

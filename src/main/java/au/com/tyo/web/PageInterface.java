@@ -17,4 +17,7 @@ public interface PageInterface {
 
 	String createTitle();
 
+    PageInterface getXPage();
+
+	String getLangCode();
 }
