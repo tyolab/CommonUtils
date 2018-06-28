@@ -17,16 +17,16 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 	
 	private Stack<File> stack;// = new Stack<File>();
 	
-	public WildcardFileStack(File file) throws Exception {
+	public WildcardFileStack(File file) {
 		this(file, "*");
 	}
 	
-	public WildcardFileStack(File file, String pattern) throws Exception {
+	public WildcardFileStack(File file, String pattern) {
 		super(file, pattern);
 		init(file, pattern);
 	}
 	
-	public WildcardFileStack(String inputfile) throws Exception {
+	public WildcardFileStack(String inputfile) {
 		super(inputfile);
 		File file = new File(inputfile);
 		if (file.getParentFile() != null)
@@ -60,7 +60,7 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 //		listInputFolder();
 	}
 
-	public void listFiles() throws Exception {
+	public void listFiles() {
 		this.listFilesInStack(stack, this.inputFileDir);
 	}
 	
@@ -92,14 +92,8 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 		if (!stack.empty()) {
 			file = stack.pop();
 			if (file.isDirectory() && toListAllFiles) {
-				try {
-					this.listFilesInStack(stack, file);
-					file = next();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				this.listFilesInStack(stack, file);
+				file = next();
 			}
 		}
 		return file;

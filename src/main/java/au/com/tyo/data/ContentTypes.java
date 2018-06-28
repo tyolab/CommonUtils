@@ -32,17 +32,24 @@ public class ContentTypes {
             "png",
             "gif",
             "jpg",
-            "jpeg"
+            "jpeg",
+            "tif",
+            "tiff"
             // more here
     };
 
     private static final List IMAGE_EXTENSION_LIST = Arrays.asList(IMAGE_EXTENSIONS);
 
     private static String extensionCheck(String ext) {
-        String fileExt = ext;
-        if (ext.charAt(0) == '.')
-            fileExt = ext.substring(1);
-        return fileExt;
+        String newExt;
+
+        int pos = ext.indexOf('.');
+        if (pos > -1)
+            newExt = ext.substring(pos + 1);
+        else
+            newExt = ext;
+
+        return newExt;
     }
 
     /**
@@ -51,6 +58,8 @@ public class ContentTypes {
      * @return
      */
     public static boolean isVideo(String ext) {
+        if (null == ext || ext.length() == 0)
+            return false;
         return isType(VIDEO_EXTENSION_LIST, ext);
     }
 
@@ -60,6 +69,9 @@ public class ContentTypes {
      * @return
      */
     public static boolean isImage(String ext) {
+        if (null == ext || ext.length() == 0)
+            return false;
+
         return isType(IMAGE_EXTENSION_LIST, ext);
     }
 
