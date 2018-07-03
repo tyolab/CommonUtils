@@ -19,6 +19,10 @@ import au.com.tyo.utils.MathUtils;
 
 public class NetUtils {
 
+    public interface NetworkScanListener {
+        void onScanning(String what);
+    }
+
     /**
      *
      * @return
@@ -207,10 +211,18 @@ public class NetUtils {
     }
 
     public static List scanLocalNetwork(List<byte[]> list, int port) {
+        return scanLocalNetwork(list, port, null);
+    }
+
+    public static List scanLocalNetwork(List<byte[]> list, int port, NetworkScanListener networkScanListener) {
         if (null != list) {
             List newList = new ArrayList();
             for (int i = 0; i < list.size(); ++i) {
                 String ip = ipToString(list.get(i));
+
+                if (networkScanListener != null)
+                    networkScanListener.onScanning(ip);
+
                 if (isHostListeningOn(ip, port))
                     newList.add(ip);
             }
