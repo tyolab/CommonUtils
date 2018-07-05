@@ -48,6 +48,21 @@ public class FileUtils implements IOConstants {
 	 * @param destFile
 	 * @throws IOException
 	 */
+
+    public static String[] getFileNameWithoutExtension(String fileName) {
+		String[] name = new String[2];
+		int pos = fileName.lastIndexOf('.');
+		if (pos > 0) {
+			name[0] = fileName.substring(0, pos);
+			if (pos < (fileName.length() - 1))
+				name[1] = fileName.substring(pos);
+		}
+		else {
+			name[0] = fileName;
+		}
+		return name;
+    }
+
 	public static void copyFile(byte[] bytes, File destFile) throws IOException {
 		InputStream is = new ByteArrayInputStream(bytes);
 		copyFile(is, destFile, null, 0);

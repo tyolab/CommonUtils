@@ -26,6 +26,8 @@ public class SimpleDateUtils {
 	
 	public static final long ONE_WEEK_IN_MILLIS = ONE_DAY_IN_MILLIS * 7;
 
+	public static final long ONE_YEAR_IN_MILLIS = ONE_DAY_IN_MILLIS * 365;
+
 	private static SimpleDateFormat JSON_SIMPLE_DATE_FORMAT;
 
 	public static String[] MONTHS = {

@@ -122,12 +122,11 @@ public class WildcardFiles implements FilenameFilter, FileFilter
 //	public Stack<File> list() throws Exception {
 //		return listFilesInStack(inputFileDir);
 //	}
-	public void listFilesInStack(Stack<File> stack) throws Exception {
+	public void listFilesInStack(Stack<File> stack) {
 		this.listFilesInStack(stack, inputFileDir);
 	}
 	
-	public void listFilesInStack(Stack<File> stack, File fileDir) throws Exception 
-	{
+	public void listFilesInStack(Stack<File> stack, File fileDir) {
 //		Stack<File> stack = new Stack<File>();
 //		File inputFileHandler = new File(inputFileDir2);
 		if (!fileDir.exists())

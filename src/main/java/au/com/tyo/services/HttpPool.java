@@ -6,6 +6,7 @@
 package au.com.tyo.services;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HttpPool {
 
@@ -36,16 +37,22 @@ public class HttpPool {
     }
 
     public static void addHttpInstance(HttpConnection instance) {
-	    if (null == pool)
-            pool = new ArrayList<>();
-		pool.add(instance);
+		getPool().add(instance);
 	}
+
+	private static List getPool() {
+        if (null == pool)
+            pool = new ArrayList<>();
+        return pool;
+    }
 
 	public void addHttpInstanceDefault() throws InstantiationException, IllegalAccessException {
         initialize();
 	}
 
 	public static HttpConnection createHttpInstanceDefault() throws IllegalAccessException, InstantiationException {
+		if (null == httpConnectionCls)
+			httpConnectionCls = HttpJavaNet.class;
         return (HttpConnection) httpConnectionCls.newInstance();
     }
 
@@ -150,6 +157,6 @@ public class HttpPool {
 	}
 
     public static int size() {
-		return getInstance().pool.size();
+		return getInstance().getPool().size();
     }
 }

@@ -70,18 +70,19 @@ public class CommonSettings extends Observable {
 		locale = Locale.getDefault();
 	}
 
+	public String getDefaultSystemLanguageCode() {
+	    return locale.getLanguage();
+    }
+
 	public static void getOSProperties() {
 		os = System.getProperty("os.name").toLowerCase();
 //		String osVersion = System.getProperty("os.version");
 	    String osArch = System.getProperty("os.arch").toLowerCase();
 	    
 	    String javaVendor = System.getProperty("java.vendor").toLowerCase();
-	    
-//	    http://jmonkeyengine.org/groups/android/forum/topic/determining-if-the-game-is-on-android-or-pc/
-//	    boolean is64 = is64Bit(arch);
+
 	    if (os.contains("windows")) {
 	    	platform = OS_WIN;
-	    	//	        return is64 ? Platform.Windows64 : Platform.Windows32;
 	    } else if (os.contains("linux") || os.contains("freebsd") || os.contains("sunos")) {
 	    	platform = OS_LINUX;
 	    	
@@ -89,42 +90,24 @@ public class CommonSettings extends Observable {
 		    	osSubId = OS_LINUX_ANDROID;
 		    	os = "android";
 		    }
-		    
-//	        return is64 ? Platform.Linux64 : Platform.Linux32;
 	    } else if (os.contains("mac os x") || os.contains("darwin")) {
-	    	platform = OS_MAC;
-//	        if (arch.startsWith("ppc")) {
-//	            return is64 ? Platform.MacOSX_PPC64 : Platform.MacOSX_PPC32;
-//	        } else {
-//	            return is64 ? Platform.MacOSX64 : Platform.MacOSX32;
-	        }
-//	    } else {
-//	        throw new UnsupportedOperationException("The specified platform: " + os + " is not supported.");
-//	    }
+			platform = OS_MAC;
+		}
 	}
 	
 	public static Properties loadInfo(String file) {
-//		HashMap<String, String> infoMap = new HashMap<String, String>();
 		Properties infoMap = null;
-//        if (version == null/* && !isMobileDevice()*/) {
-            try {
-                InputStream in =
-                    CommonSettings.class.getResourceAsStream(file);
-                if (in != null) {
-                	infoMap = new Properties();
-                	infoMap.load(in);
-	                in.close();
-	
-	//                StringBuffer msg = new StringBuffer();
-	//                msg.append("Wikipedia Anywhere version ");
-	//                msg.append();
-	//                msg.append(" compiled on ");
-	//                msg.append(props.getProperty("DATE"));
-                }
-            } catch (IOException ioe) {
-            	ioe.printStackTrace();
-            } 
-//        }
+		try {
+			InputStream in =
+				CommonSettings.class.getResourceAsStream(file);
+			if (in != null) {
+				infoMap = new Properties();
+				infoMap.load(in);
+				in.close();
+			}
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
         return infoMap;
 	}
 	
