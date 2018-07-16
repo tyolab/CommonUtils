@@ -210,11 +210,11 @@ public class NetUtils {
                 MathUtils.toUnsignedInt(ip[3]));
     }
 
-    public static List scanLocalNetwork(List<byte[]> list, int port) {
-        return scanLocalNetwork(list, port, null);
+    public static List scanLocalNetwork(List<byte[]> list, int port, NetworkScanListener networkScanListener) {
+        return scanLocalNetwork(list, port, null, false);
     }
 
-    public static List scanLocalNetwork(List<byte[]> list, int port, NetworkScanListener networkScanListener) {
+    public static List scanLocalNetwork(List<byte[]> list, int port, NetworkScanListener networkScanListener, boolean hitThenStop) {
         if (null != list) {
             List newList = new ArrayList();
             for (int i = 0; i < list.size(); ++i) {
@@ -223,8 +223,12 @@ public class NetUtils {
                 if (networkScanListener != null)
                     networkScanListener.onScanning(ip);
 
-                if (isHostListeningOn(ip, port))
+                if (isHostListeningOn(ip, port)) {
                     newList.add(ip);
+
+                    if (hitThenStop)
+                        break;
+                }
             }
             return newList;
         }
