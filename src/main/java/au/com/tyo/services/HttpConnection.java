@@ -524,7 +524,9 @@ public abstract class HttpConnection<T extends HttpConnection> {
 
     protected void reset() {
         inUsed = false;
-        headers.clear();
+
+        if (null != headers)
+            headers.clear();
     }
     /**
      *

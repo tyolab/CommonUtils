@@ -11,28 +11,43 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/*
- * the below code is from:
+/**
+ * some code below was from:
  * 
  *  http://stackoverflow.com/questions/106770/standard-concise-way-to-copy-a-file-in-java
  */
 
 public class FileUtils implements IOConstants {
 
+	/**
+	 *
+	 */
 	public interface Progress {
 		void infoProgress(Integer progress);
 	}
+
+	/**
+	 *
+	 * @param bytes
+	 * @param destFile
+	 * @throws IOException
+	 */
 
     public static String[] getFileNameWithoutExtension(String fileName) {
 		String[] name = new String[2];
@@ -47,17 +62,23 @@ public class FileUtils implements IOConstants {
 		}
 		return name;
     }
-	
+
 	public static void copyFile(byte[] bytes, File destFile) throws IOException {
 		InputStream is = new ByteArrayInputStream(bytes);
 		copyFile(is, destFile, null, 0);
 	}
-	
+
+	/**
+	 *
+	 * @param is
+	 * @param destFile
+	 * @throws IOException
+	 */
 	public static void copyFile(InputStream is, File destFile) throws IOException {
 		copyFile(is, destFile, null, 0);
 	}
 	
-	/*
+	/**
 	 * progress: 0 - 100
 	 */
 	public static void copyFile(InputStream is, File destFile, Progress progress, int fileSize) throws IOException {
@@ -95,7 +116,13 @@ public class FileUtils implements IOConstants {
 //			if is.close(); 
 //		}  
 	}
-	
+
+	/**
+	 *
+	 * @param sourceFile
+	 * @param destFile
+	 * @throws IOException
+	 */
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
 		 if(!destFile.exists()) {
 			  destFile.createNewFile();
@@ -117,11 +144,24 @@ public class FileUtils implements IOConstants {
 			  }
 		 }
 	}
-	
+
+	/**
+	 *
+	 * @param sourceFile
+	 * @param destFile
+	 * @throws IOException
+	 */
 	public static void copyFile(String sourceFile, String destFile) throws IOException {
 		copyFile(new File(sourceFile), new File(destFile));
 	}
-	
+
+	/**
+	 *
+	 * @param sourceFile
+	 * @param destFileStr
+	 * @param pieceSize
+	 * @param progress
+	 */
 	public static void copyPiece(String sourceFile, String destFileStr, int pieceSize, Progress progress) {
 		try {
 			RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
@@ -163,21 +203,44 @@ public class FileUtils implements IOConstants {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 *
+	 * @param sourceFile
+	 * @param destFile
+	 * @throws IOException
+	 */
 	public static void moveFile(String sourceFile, String destFile) throws IOException {
 		moveFile(new File(sourceFile), new File(destFile));
 	}
-	
+
+	/**
+	 *
+	 * @param sourceFile
+	 * @param destFile
+	 * @throws IOException
+	 */
 	public static void moveFile(File sourceFile, File destFile) throws IOException {
 		copyFile(sourceFile, destFile);
 		
 		sourceFile.delete();
 	}
-	 
+
+	/**
+	 *
+	 * @param file
+	 * @param content
+	 */
 	public static void writeFile(File file, String content) {
 		writeFile(file, content, "UTF-8");
 	}
-	
+
+	/**
+	 *
+	 * @param file
+	 * @param content
+	 * @param charset
+	 */
 	public static void writeFile(File file, String content, String charset) {
         BufferedWriter out;
 		try {
@@ -193,11 +256,22 @@ public class FileUtils implements IOConstants {
 		} 
 
 	}
-	
+
+	/**
+	 *
+	 * @param name
+	 * @return
+	 */
 	public static String increaseFileNumber(String name) {
 		return increaseFileNumber(name, false);
 	}
-	
+
+	/**
+	 *
+	 * @param name
+	 * @param first
+	 * @return
+	 */
 	public static String increaseFileNumber(String name, boolean first) {
 		String filename = name;
 		int pos;
@@ -257,10 +331,21 @@ public class FileUtils implements IOConstants {
 		if (!f.delete()) throw new FileNotFoundException("Failed to delete file: " + f);
 	}
 
+	/**
+	 *
+	 * @param files
+	 * @return
+	 */
 	public static List<File> sortByLastModified(List files) {
 		return sortByLastModified(files, false);
 	}
 
+	/**
+	 *
+	 * @param files
+	 * @param accendingOrder
+	 * @return
+	 */
 	public static List<File> sortByLastModified(List files, boolean accendingOrder) {
 		Collections.sort(files, new Comparator<File>() {
 			public int compare(File f1, File f2) {
@@ -277,5 +362,28 @@ public class FileUtils implements IOConstants {
 			}
 		});
 		return files;
+	}
+
+	/**
+	 *
+	 * For Java 7+, or Android 26+
+	 *
+	 * @param fileName
+	 * @param text
+	 * @throws IOException
+	 */
+	public static void append(String fileName, String text) throws IOException {
+		Files.write(Paths.get(fileName), text.getBytes(), StandardOpenOption.APPEND);
+	}
+
+	/**
+	 *
+	 * @param fileName
+	 * @param text
+	 */
+	public static void appendWith(String fileName, String text) throws IOException {
+		PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
+		out.println(text);
+		out.close();
 	}
 }
