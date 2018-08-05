@@ -40,7 +40,7 @@ public class ContentTypes {
 
     private static final List IMAGE_EXTENSION_LIST = Arrays.asList(IMAGE_EXTENSIONS);
 
-    private static String extensionCheck(String ext) {
+    public static String extensionCheck(String ext) {
         String newExt;
 
         int pos = ext.indexOf('.');
