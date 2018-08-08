@@ -257,6 +257,12 @@ public class IO {
         return nread;
 	}
 
+	/**
+	 *
+	 * @param tempFile
+	 * @param os
+	 * @throws IOException
+	 */
     public static void writeFile(File tempFile, ByteArrayOutputStream os) throws IOException {
         OutputStream outputStream = new FileOutputStream(tempFile);
         os.writeTo(outputStream);
