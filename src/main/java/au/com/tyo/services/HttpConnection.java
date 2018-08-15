@@ -335,7 +335,7 @@ public abstract class HttpConnection<T extends HttpConnection> {
         return cookiePath + File.separator + host + ".cookie";
     }
 
-    public void loadCookieFromFile(String cookieFile) {
+    public void loadCookieFromFile(String cookieFile) throws IOException {
         if (null != cookieFile) {
             File file = new File(cookieFile);
 

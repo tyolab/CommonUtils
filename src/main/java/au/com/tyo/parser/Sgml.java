@@ -6,6 +6,7 @@
 package au.com.tyo.parser;
 
 import java.io.File;
+import java.io.IOException;
 
 import au.com.tyo.io.IO;
 import au.com.tyo.utils.ByteArrayKMP;
@@ -39,7 +40,7 @@ public class Sgml {
 //			this.value = value;
 //		}
 //	}
-	public SgmlNode parse(File file) {
+	public SgmlNode parse(File file) throws IOException {
 		return parse(new String(IO.readFileIntoBytes(file)));
 	}
 	

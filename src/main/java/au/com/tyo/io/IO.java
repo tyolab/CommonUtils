@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +17,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 
 public class IO {
 
@@ -90,14 +88,14 @@ public class IO {
      * @param file
      * @return
      */
-	static public byte[] readFileIntoBytes(File file) {
+	static public byte[] readFileIntoBytes(File file) throws IOException {
 	    byte[] bytes = null;
 	    FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(file);
 		    bytes = readFileIntoBytes(fis);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw e;
 		}
 		finally {
 			if (null != fis)
@@ -114,7 +112,7 @@ public class IO {
 	 * TODO
      * charsets
 	 */
-	static public byte[] readFileIntoBytes(String file) {
+	static public byte[] readFileIntoBytes(String file) throws IOException {
 		return readFileIntoBytes(new File(file));
 	}
 
@@ -123,13 +121,10 @@ public class IO {
 	 * @param file
 	 * @return
 	 */
-	static String readFileIntoString(String file) {
+	static String readFileIntoString(String file) throws IOException {
 		String content = null;
-		try {
-			content = new String(readFileIntoBytes(file), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+        content = new String(readFileIntoBytes(file), "UTF-8");
+
 		return content;
 	}
 
@@ -137,29 +132,24 @@ public class IO {
 	 *
 	 * @param filename
 	 * @param bytes
-	 */
-	public static void writeFile(String filename, byte[] bytes) {
-		writeFile(filename, bytes, "UTF-8");
+     */
+	public static void writeFile(String filename, byte[] bytes) throws IOException {
+		writeFile(new File(filename), bytes);
 	}
 
-	/**
-	 *
-	 * @param filename
-	 * @param bytes
-	 * @param charset
-	 */
-	public static void writeFile(String filename, byte[] bytes, String charset) {
+    /**
+     *
+     * @param file
+     * @param bytes
+     */
+	public static void writeFile(File file, byte[] bytes) throws IOException {
         FileOutputStream out = null;
 		try {
-//			out = new BufferedWriter(new OutputStreamWriter(new ByteArrayOutputStream(bytes), charset));
-			out = new FileOutputStream(filename);
+			out = new FileOutputStream(file);
 	        out.write(bytes);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		}
+		catch (IOException e) {
+            throw e;
 		}
 		finally { 
 		    try { if (out != null ) out.close(); }
@@ -172,7 +162,7 @@ public class IO {
 	 * @param file
 	 * @param content
 	 */
-	public static void writeFile(File file, String content) {
+	public static void writeFile(File file, String content) throws IOException {
 		writeFile(file, content, "UTF-8");
 	}
 
@@ -182,17 +172,13 @@ public class IO {
 	 * @param content
 	 * @param charset
 	 */
-	public static void writeFile(File file, String content, String charset) {
+	public static void writeFile(File file, String content, String charset) throws IOException {
         BufferedWriter out = null;
 		try {
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset));
 	        out.write(content);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+		    throw e;
 		} 
 		finally { 
 		    try { if (out != null ) out.close(); }
