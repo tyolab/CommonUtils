@@ -116,4 +116,16 @@ public class ContentTypes {
         String ext = getExtension(url);
         return isType("svg", ext);
     }
+
+    public static String[] splitNameByExt(String file) {
+        String[] pair = new String[2];
+        int pos = file.lastIndexOf('.');
+        if (pos > -1 && pos < (file.length() - 1)) {
+            pair[1] = file.substring(pos + 1);
+            pair[0] = file.substring(0, pos);
+        }
+        else
+            pair[0] = file;
+        return pair;
+    }
 }
