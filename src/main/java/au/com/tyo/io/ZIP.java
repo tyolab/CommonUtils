@@ -67,7 +67,7 @@ public class ZIP implements IOConstants {
             if (progress != null) {
             	++count;
             	if (totalFileCount > 0)
-            		percent = (double)count / (double)totalFileCount;
+            		percent = (double)count / (double) totalFileCount;
             	else
             		percent += 0.00001;
             	progress.infoProgress(Double.valueOf((percent  * 100)).intValue());
