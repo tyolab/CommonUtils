@@ -36,19 +36,19 @@ import java.util.List;
 public class FileUtils implements IOConstants {
 
 	/**
-	 *
+	 * The progress interface
 	 */
 	public interface Progress {
 		void infoProgress(Integer progress);
-	}
+
+        void moveToNextStage();
+    }
 
 	/**
 	 *
-	 * @param bytes
-	 * @param destFile
-	 * @throws IOException
+	 * @param fileName
+	 * @return
 	 */
-
     public static String[] getFileNameWithoutExtension(String fileName) {
 		String[] name = new String[2];
 		int pos = fileName.lastIndexOf('.');
@@ -63,6 +63,12 @@ public class FileUtils implements IOConstants {
 		return name;
     }
 
+	/**
+	 *
+	 * @param bytes
+	 * @param destFile
+	 * @throws IOException
+	 */
 	public static void copyFile(byte[] bytes, File destFile) throws IOException {
 		InputStream is = new ByteArrayInputStream(bytes);
 		copyFile(is, destFile, null, 0);
