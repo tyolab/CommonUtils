@@ -207,7 +207,6 @@ public class FileUtils implements IOConstants {
 		        byte[] buffer = new byte[BUFFER_SIZE];
 		        int byteRead = 0;
 		        double percent = 0.0f;
-		        int nearestLen = pieceSize - BUFFER_SIZE;
 
 		        raf.seek(offset);
 
