@@ -174,7 +174,7 @@ public class FileUtils implements IOConstants {
      * @param sourceFile
      * @param destFileStr
      * @param index
-     * @param pieceSize
+     * @param pieceSize, -1 the whole size
      * @param progress
      */
 	public static void copyPiece(String sourceFile, String destFileStr, int index, int pieceSize, Progress progress) throws IOException {
@@ -190,7 +190,7 @@ public class FileUtils implements IOConstants {
 			else
 				offset = index;
 
-			if (pieceSize <= 0)
+			if (pieceSize < 0)
 			    pieceSize = (int) raf.length();
 
 			if ((offset + pieceSize) > raf.length())
@@ -198,21 +198,32 @@ public class FileUtils implements IOConstants {
 			
 			File destFile = new File(destFileStr);
 			 if(!destFile.exists())
-			 	destFile.createNewFile();
+			 	 destFile.createNewFile();
+			 else
+			     destFile.delete();
 			 
 		    OutputStream os = new FileOutputStream(destFile, false);  
 		    try {
 		        byte[] buffer = new byte[BUFFER_SIZE];
 		        int byteRead = 0;
 		        double percent = 0.0f;
+		        int nearestLen = pieceSize - BUFFER_SIZE;
+
 		        raf.seek(offset);
-		        
+
 		        for (int n; (n = raf.read(buffer)) != -1; ) {
-		            os.write(buffer, 0, n); 
-		            if (progress != null && pieceSize > 0) {
-		            	byteRead += n;
+		            if ((byteRead + n) <= pieceSize) {
+                        os.write(buffer, 0, n);
+                        byteRead += n;
+                    }
+		            else {
+		                int leftByteLen = pieceSize - byteRead;
+                        os.write(buffer, 0, leftByteLen);
+                        byteRead += leftByteLen;
+                    }
+		            if (progress != null) {
 		            	if (byteRead >= pieceSize)
-		            		percent = 1;
+		            		percent = 100;
 		            	else
 		            		percent = (double)byteRead / (double)pieceSize;
 		            	progress.infoProgress(Double.valueOf((percent  * 100)).intValue());
