@@ -161,22 +161,36 @@ public class FileUtils implements IOConstants {
 		copyFile(new File(sourceFile), new File(destFile));
 	}
 
-	/**
-	 *
-	 * @param sourceFile
-	 * @param destFileStr
-	 * @param pieceSize
-	 * @param progress
-	 */
-	public static void copyPiece(String sourceFile, String destFileStr, int pieceSize, Progress progress) {
+    /**
+     *
+     * @param sourceFile
+     * @param destFileStr
+     * @param index
+     * @param pieceSize
+     * @param progress
+     */
+	public static void copyPiece(String sourceFile, String destFileStr, int index, int pieceSize, Progress progress) throws IOException {
 		try {
 			RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
-			long offset = raf.length() - pieceSize;
+			long offset;
+
+            /**
+             * From the back, pieceSize is the size of the file we want to use
+             */
+			if (index < 0)
+				offset = raf.length() - pieceSize;
+			else
+				offset = index;
+
+			if (pieceSize <= 0)
+			    pieceSize = (int) raf.length();
+
+			if ((offset + pieceSize) > raf.length())
+				throw new IllegalStateException("The offset and piece size is not within the range of the package size");
 			
 			File destFile = new File(destFileStr);
-			 if(!destFile.exists()) {
-				  destFile.createNewFile();
-			 }
+			 if(!destFile.exists())
+			 	destFile.createNewFile();
 			 
 		    OutputStream os = new FileOutputStream(destFile, false);  
 		    try {
@@ -202,11 +216,11 @@ public class FileUtils implements IOConstants {
 		    }
 		    finally { 
 		    	if (os != null) os.close(); 
-		    }  
+		    }
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			throw e;
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw e;
 		}
 	}
 
