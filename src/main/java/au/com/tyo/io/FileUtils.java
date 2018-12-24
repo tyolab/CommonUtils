@@ -123,6 +123,14 @@ public class FileUtils implements IOConstants {
 //		}  
 	}
 
+    public static void copyFileIfNotTheSame(String sourceFile, String destFile) throws IOException {
+        File sourceFileHandle = new File(sourceFile);
+        File destFileHandle = new File(destFile);
+
+        if (!destFileHandle.exists() || sourceFileHandle.length() != destFileHandle.length())
+            FileUtils.copyFile(sourceFileHandle, destFileHandle);
+    }
+
 	/**
 	 *
 	 * @param sourceFile
