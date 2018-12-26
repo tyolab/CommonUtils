@@ -123,12 +123,33 @@ public class FileUtils implements IOConstants {
 //		}  
 	}
 
+    /**
+     *
+     * @param sourceFile
+     * @param destFile
+     * @throws IOException
+     */
     public static void copyFileIfNotTheSame(String sourceFile, String destFile) throws IOException {
         File sourceFileHandle = new File(sourceFile);
         File destFileHandle = new File(destFile);
 
         if (!destFileHandle.exists() || sourceFileHandle.length() != destFileHandle.length())
             FileUtils.copyFile(sourceFileHandle, destFileHandle);
+    }
+
+    /**
+     *
+     * @param sourceFile
+     * @param destFile
+     * @param progress
+     * @throws IOException
+     */
+    public static void copyPieceIfNotTheSame(String sourceFile, String destFile, Progress progress) throws IOException {
+        File sourceFileHandle = new File(sourceFile);
+        File destFileHandle = new File(destFile);
+
+        if (!destFileHandle.exists() || sourceFileHandle.length() != destFileHandle.length())
+            FileUtils.copyPiece(sourceFileHandle, destFileHandle, 0, sourceFile.length(), progress);
     }
 
 	/**
@@ -177,7 +198,20 @@ public class FileUtils implements IOConstants {
      * @param pieceSize, -1 the whole size
      * @param progress
      */
-	public static void copyPiece(String sourceFile, String destFileStr, int index, int pieceSize, Progress progress) throws IOException {
+    public static void copyPiece(String sourceFile, String destFileStr, int index, int pieceSize, Progress progress) throws IOException {
+        copyPiece(new File(sourceFile), new File(destFileStr), index, pieceSize, progress);
+    }
+
+    /**
+     *
+     * @param sourceFile
+     * @param destFile
+     * @param index
+     * @param pieceSize
+     * @param progress
+     * @throws IOException
+     */
+	public static void copyPiece(File sourceFile, File destFile, int index, int pieceSize, Progress progress) throws IOException {
 		try {
 			RandomAccessFile raf = new RandomAccessFile(sourceFile, "r");
 			long offset;
@@ -195,8 +229,7 @@ public class FileUtils implements IOConstants {
 
 			if ((offset + pieceSize) > raf.length())
 				throw new IllegalStateException("The offset and piece size is not within the range of the package size");
-			
-			File destFile = new File(destFileStr);
+
 			 if(!destFile.exists())
 			 	 destFile.createNewFile();
 			 else
