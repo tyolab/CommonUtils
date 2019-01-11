@@ -149,7 +149,7 @@ public class FileUtils implements IOConstants {
         File destFileHandle = new File(destFile);
 
         if (!destFileHandle.exists() || sourceFileHandle.length() != destFileHandle.length())
-            FileUtils.copyPiece(sourceFileHandle, destFileHandle, 0, sourceFile.length(), progress);
+            FileUtils.copyPiece(sourceFileHandle, destFileHandle, 0, (int) sourceFileHandle.length(), progress);
     }
 
 	/**
