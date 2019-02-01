@@ -153,6 +153,8 @@ public class FileUtils implements IOConstants {
     }
 
 	/**
+	 * This function may require huge amount of memory if the source file is large,
+	 * so copying may not be always successful due to "Out of Memory" error
 	 *
 	 * @param sourceFile
 	 * @param destFile
