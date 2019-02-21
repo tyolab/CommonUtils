@@ -52,8 +52,7 @@ public class CommonSettings extends Observable {
 	protected boolean firstTimeRun;
 	
 	protected Locale locale;
-	
-	
+
 	static {
 		isLandscapeMode = false;
 		getOSProperties();
