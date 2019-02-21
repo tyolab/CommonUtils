@@ -6,12 +6,9 @@
 package au.com.tyo.io;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Stack;
-
-import au.com.tyo.io.WildcardFiles;
 
 public class WildcardFileStack extends WildcardFiles implements Comparator<File> {
 	
@@ -23,41 +20,42 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 	
 	public WildcardFileStack(File file, String pattern) {
 		super(file, pattern);
+
 		init(file, pattern);
 	}
-	
+
+	public WildcardFileStack(String inputfile, String pattern) {
+		this(new File(inputfile), pattern);
+	}
+
 	public WildcardFileStack(String inputfile) {
-		super(inputfile);
-		File file = new File(inputfile);
-		if (file.getParentFile() != null)
-			init(file.getParentFile(), file.getName());
-		else 
-			init(file, "*");	
+		this(new File(inputfile));
 	}
 	
 	private void init(File file, String pattern) {
 		if (file == null)
 			return;
-		
+
 		stack = new Stack<File>();
+
 		if (file.isDirectory()) {
 			inputFileDir = file;
-			wildcard = "*";
+			wildcard = pattern;
 		}
 		else {
 			if (file.exists() && file.isFile()) {
 				stack.add(file);
 				return;
 			}
+
+			inputFileDir = file.getParentFile();
+			if (inputFileDir.exists() && inputFileDir.isDirectory())
+				wildcard = file.getName();
+			else
+				return;
 		}
-		wildcard = pattern;
+
 		createPattern(wildcard);
-	}
-	
-	public WildcardFileStack(String inputfile, String pattern) throws Exception {
-		this.setDirectory(inputfile);
-		createPattern(pattern);
-//		listInputFolder();
 	}
 
 	public void listFiles() {
