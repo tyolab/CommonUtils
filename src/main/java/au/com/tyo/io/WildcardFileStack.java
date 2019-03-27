@@ -10,10 +10,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Stack;
 
-public class WildcardFileStack extends WildcardFiles implements Comparator<File> {
-	
-	private Stack<File> stack;// = new Stack<File>();
-	
+public class WildcardFileStack extends WildcardFiles<File> implements Comparator<File> {
+
 	public WildcardFileStack(File file) {
 		this(file, "*");
 	}
@@ -36,15 +34,13 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 		if (file == null)
 			return;
 
-		stack = new Stack<File>();
-
 		if (file.isDirectory()) {
 			inputFileDir = file;
 			wildcard = pattern;
 		}
 		else {
 			if (file.exists() && file.isFile()) {
-				stack.add(file);
+				add(file);
 				return;
 			}
 
@@ -59,11 +55,11 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 	}
 
 	public void listFiles() {
-		this.listFilesInStack(stack, this.inputFileDir);
+		this.listFilesInStack(this, this.inputFileDir);
 	}
 	
 	public void sortByDate() {
-		Collections.sort(this.stack, this);
+		Collections.sort(this, this);
 	}
 	
 //	private void listFiles(File parentDirHandler) throws IOException {
@@ -87,10 +83,10 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 
 	public File next() {
 		File file = null;
-		if (!stack.empty()) {
-			file = stack.pop();
+		if (!empty()) {
+			file = pop();
 			if (file.isDirectory() && toListAllFiles) {
-				this.listFilesInStack(stack, file);
+				this.listFilesInStack(this, file);
 				file = next();
 			}
 		}
@@ -98,7 +94,7 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 	}
 	
 	public int size() {
-		return stack.size();
+		return size();
 	}
 
 	@Override
@@ -107,6 +103,6 @@ public class WildcardFileStack extends WildcardFiles implements Comparator<File>
 	}
 	
 	public File get(int index) {
-		return stack.get(index);
+		return get(index);
 	}
 }

@@ -8,6 +8,7 @@ package au.com.tyo.io;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,7 +26,7 @@ import au.com.tyo.io.WildcardFiles;
   }
  */
 
-public class WildcardFiles implements FilenameFilter, FileFilter
+public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFilter
 {
 	protected Pattern pattern = null;
 	protected String wildcard = "";
@@ -118,17 +119,21 @@ public class WildcardFiles implements FilenameFilter, FileFilter
 			throw new Exception("No such file: " + inputFileDir);
 		}
 	}
-	
-//	public Stack<File> list() throws Exception {
-//		return listFilesInStack(inputFileDir);
-//	}
+
+    /**
+     *
+     * @param stack
+     */
 	public void listFilesInStack(Stack<File> stack) {
 		this.listFilesInStack(stack, inputFileDir);
 	}
-	
+
+    /**
+     *
+     * @param stack
+     * @param fileDir
+     */
 	public void listFilesInStack(Stack<File> stack, File fileDir) {
-//		Stack<File> stack = new Stack<File>();
-//		File inputFileHandler = new File(inputFileDir2);
 		if (!fileDir.exists())
 			return;
 		
@@ -146,44 +151,7 @@ public class WildcardFiles implements FilenameFilter, FileFilter
 	        else if (accept(f))
 	        	stack.push(f);
 	    }
-
-//		if (includeAllSubfolders) {
-//			File[] allFiles = inputFileDir.listFiles();
-//			 for (File f : allFiles) {
-//				if (includeAllSubfolders && f.isDirectory()) {
-//					if (this.toListAllFiles())
-//						listFilesInStack(stack, f);
-//					else
-//						stack.push(f);
-//				}
-//				else if (accept(f))
-//					stack.push(f);
-//			 }
-//		}
-//		else {
-//			if (fileDir.isFile()) 
-//				stack.add(fileDir);
-////			File[] arrFile = inputFileDir.listFiles((FileFilter) this);
-////			if (arrFile != null)
-////				stack.addAll(Arrays.asList(arrFile));
-//		}
-//		if (fileDir.isFile()) {
-//			stack.add(fileDir);
-//		}
-//		else if (fileDir.isDirectory() && includeAllSubfolders) {
-//			stack.addAll(Arrays.asList(listFiles(fileDir)));
-//		}
-//		else {
-//
-//		}
-//		return stack;
 	}
-	
-//	public Stack<File> listFilesInStack(String inputfile) throws Exception 
-//	{
-////		breakFile(inputfile);
-//		return listFilesInStack(new File(inputfile));
-//	}
 	
 	/**
 	 * @return the wildcard
@@ -227,5 +195,5 @@ public class WildcardFiles implements FilenameFilter, FileFilter
 	@Override
 	public boolean accept(File dir, String name) {
 		return match(name);
-	}	
+	}
 }
