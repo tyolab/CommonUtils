@@ -107,12 +107,7 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 		setDirectory(dir);
 	}
 	
-//	private static void listFiles(String inputfile, Stack stack) 
-//	{
-//			File[] arrFile = new File(inputFileDir).listFiles((FileFilter)new WildcardFiles(wildcard));
-//			stack.addAll(Arrays.asList(arrFile));
-//	}
-	
+
 	protected void setDirectory(String dir) throws Exception {
 		inputFileDir = new File(dir);
 		if (!inputFileDir.exists()){

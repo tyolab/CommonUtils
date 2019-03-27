@@ -61,25 +61,6 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 	public void sortByDate() {
 		Collections.sort(this, this);
 	}
-	
-//	private void listFiles(File parentDirHandler) throws IOException {
-		
-//		if (parentDirHandler.exists()) {
-//		   File[] allFiles = parentDirHandler.listFiles();
-//		    for (File f : allFiles) {
-//		        if (includeAllSubfolders && f.isDirectory()) {
-//		        	if (this.isToListAllFiles())
-//		        		listFiles(f);
-//		        	else
-//		        		stack.push(f);
-//		        }
-//		        else if (accept(f))
-//		        	stack.push(f);
-//		    }
-//		}
-//		else
-//			throw new IOException(inputFileDir + ": No such folder exists");
-//	}
 
 	public File next() {
 		File file = null;
@@ -92,17 +73,10 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 		}
 		return file;
 	}
-	
-	public int size() {
-		return size();
-	}
 
 	@Override
 	public int compare(File lhs, File rhs) {
 		return rhs.lastModified() > lhs.lastModified() ? -1 : 1;
 	}
-	
-	public File get(int index) {
-		return get(index);
-	}
+
 }
