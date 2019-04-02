@@ -1,6 +1,7 @@
 package au.com.tyo.data;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,6 +25,10 @@ public class ContentTypes {
         "m4p",
         "m4v",
         "wmv"
+    };
+
+    private static final String[] TEXT_EXTENSIONS = {
+            "txt"
     };
 
     private static final List VIDEO_EXTENSION_LIST = Arrays.asList(VIDEO_EXTENSIONS);
@@ -78,6 +83,18 @@ public class ContentTypes {
 
     /**
      *
+     * @param ext
+     * @return
+     */
+    public static boolean isText(String ext) {
+        if (null == ext || ext.length() == 0)
+            return false;
+
+        return isType(TEXT_EXTENSIONS, ext);
+    }
+
+    /**
+     *
      * @param list
      * @param ext
      * @return
@@ -89,6 +106,15 @@ public class ContentTypes {
         String fileExt = extensionCheck(ext).toLowerCase();
 
         return list.contains(fileExt);
+    }
+
+    private static boolean isType(String[] list, String ext) {
+        if (null == ext || ext.length() == 0)
+            return false;
+
+        String fileExt = extensionCheck(ext).toLowerCase();
+
+        return Arrays.binarySearch(list, ext, String::compareTo) > -1;
     }
 
     private static boolean isType(String type, String ext) {
