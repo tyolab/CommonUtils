@@ -416,16 +416,16 @@ public class FileUtils implements IOConstants {
 	/**
 	 *
 	 * @param files
-	 * @param accendingOrder
+	 * @param accedingOrder
 	 * @return
 	 */
-	public static List<File> sortByLastModified(List files, boolean accendingOrder) {
+	public static List<File> sortByLastModified(List files, final boolean accedingOrder) {
 		Collections.sort(files, new Comparator<File>() {
 			public int compare(File f1, File f2) {
 				long m1 = f1.lastModified();
 				long m2 = f2.lastModified();
 
-				int v = accendingOrder ? 1 : -1;
+				int v = accedingOrder ? 1 : -1;
 
 				if (m1 == m2)
 					return 0;

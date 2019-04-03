@@ -10,7 +10,6 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation group: 'org.json', name: 'json', version: '20180130'
-    // implementation 'org.twitter4j:twitter4j-core:4.0.2'
 }
 
 repositories {
@@ -19,5 +18,5 @@ repositories {
     }
 }
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

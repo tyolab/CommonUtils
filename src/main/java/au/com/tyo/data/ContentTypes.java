@@ -2,6 +2,7 @@ package au.com.tyo.data;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -114,7 +115,12 @@ public class ContentTypes {
 
         String fileExt = extensionCheck(ext).toLowerCase();
 
-        return Arrays.binarySearch(list, ext, String::compareTo) > -1;
+        return Arrays.binarySearch(list, ext, new Comparator<String>() {
+            @Override
+            public int compare(String s, String t1) {
+                return s.compareTo(t1);
+            }
+        }) > -1;
     }
 
     private static boolean isType(String type, String ext) {
