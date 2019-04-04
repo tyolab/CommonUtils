@@ -115,7 +115,7 @@ public class ContentTypes {
 
         String fileExt = extensionCheck(ext).toLowerCase();
 
-        return Arrays.binarySearch(list, ext, new Comparator<String>() {
+        return Arrays.binarySearch(list, fileExt, new Comparator<String>() {
             @Override
             public int compare(String s, String t1) {
                 return s.compareTo(t1);
@@ -131,6 +131,7 @@ public class ContentTypes {
     }
 
     /**
+     * The extension name without the dot - "."
      *
      * @param file
      * @return
@@ -138,7 +139,7 @@ public class ContentTypes {
     public static String getExtension(String file) {
         int pos = file.lastIndexOf('.');
         if (pos > -1) {
-            String ext = file.substring(pos);
+            String ext = file.substring(pos + 1);
             return ext;
         }
         return null;

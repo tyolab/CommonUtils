@@ -20,7 +20,7 @@ import java.io.OutputStreamWriter;
 
 public class IO {
 
-	public static final int BUFFER_SIZE = 4096;
+	public static final int BUFFER_SIZE = 4096 * 4;
 
     /**
      *
@@ -195,12 +195,7 @@ public class IO {
 	public static byte[] inputStreamToBytes(InputStream is) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-		int nRead;
-		byte[] data = new byte[BUFFER_SIZE];
-
-		while ((nRead = is.read(data, 0, data.length)) != -1) {
-		  buffer.write(data, 0, nRead);
-		}
+		long nRead = pipe(is, buffer);
 
 		buffer.flush();
 
@@ -229,17 +224,11 @@ public class IO {
         if (null == is)
             return 0;
 
-        FileOutputStream fos = new FileOutputStream(tempFile);
+        FileOutputStream outputStream = new FileOutputStream(tempFile);
 
-        long nread = 0L;
-        byte[] buf = new byte[BUFFER_SIZE];
-        int n;
-        while ((n = is.read(buf)) > 0) {
-            fos.write(buf, 0, n);
-            nread += n;
-        }
+        long nread = pipe(is, outputStream);
 
-        is.close();
+        outputStream.close();
         return nread;
 	}
 
@@ -287,4 +276,32 @@ public class IO {
     public static InputStream bytesAsInputStream(byte[] bytes) {
 		return new ByteArrayInputStream(bytes);
     }
+
+	/**
+	 *
+	 * @param file
+	 * @return
+	 */
+	public static String readText(File file) throws IOException {
+		return new String(readFileIntoBytes(file));
+    }
+
+	/**
+	 * Pipe from in to out, without closing any of that at the end
+	 *
+	 * @param inputStream
+	 * @param outputStream
+	 * @return
+	 * @throws IOException
+	 */
+	public static long pipe(InputStream inputStream, OutputStream outputStream) throws IOException {
+		long nread = 0L;
+		byte[] buf = new byte[BUFFER_SIZE];
+		int n;
+		while ((n = inputStream.read(buf)) > 0) {
+			outputStream.write(buf, 0, n);
+			nread += n;
+		}
+		return nread;
+	}
 }
