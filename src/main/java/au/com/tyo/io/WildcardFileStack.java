@@ -79,4 +79,22 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 		return rhs.lastModified() > lhs.lastModified() ? -1 : 1;
 	}
 
+	public void deleteAll() {
+		synchronized (this) {
+			boolean oldtoListAllFiles = toListAllFiles;
+			boolean includSubfolders = includeAllSubfolders;
+
+			// delete files in subdirectories only when we come to it
+			includeAllSubfolders = false;
+			toListAllFiles = true;
+			listFiles();
+			File file;
+			while ((file = next()) != null) {
+				file.delete();
+			}
+			toListAllFiles = oldtoListAllFiles;
+			includeAllSubfolders = includSubfolders;
+		}
+	}
+
 }
