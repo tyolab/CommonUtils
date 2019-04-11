@@ -83,6 +83,25 @@ public class IO {
 		return bytes;
 	}
 
+	/**
+	 * For input stream of unknown size
+	 *
+	 * @param is
+	 * @return
+	 */
+	static public byte[] inputStreamToByteArray(InputStream is) throws IOException {
+		byte[] buffer = new byte[BUFFER_SIZE];
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+		int len;
+		while ((len = is.read(buffer)) > 0) {
+			byteArrayOutputStream.write(buffer, 0, len);
+		}
+
+		byteArrayOutputStream.close();
+		return byteArrayOutputStream.toByteArray();
+	}
+
     /**
      *
      * @param file
