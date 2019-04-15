@@ -41,7 +41,8 @@ public class ContentTypes {
             "jpeg",
             "tif",
             "tiff",
-            "svg"
+            "svg",
+            "webp"
             // more here
     };
 
