@@ -30,7 +30,7 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 {
 	protected Pattern pattern = null;
 	protected String wildcard = "";
-	protected File inputFileDir = new File(".");
+	protected File inputFileDir; // = new File(".");
 		
 	protected boolean includeAllSubfolders = false;
 	
