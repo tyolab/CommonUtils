@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -278,7 +279,6 @@ public class IO {
 			out.writeObject(target);
 		}
 		catch (Exception e) {
-			e.printStackTrace();
 			throw e;
 		}
 		finally {
@@ -288,7 +288,9 @@ public class IO {
 				if (fileOut != null)
 					fileOut.close();
 			}
-			catch(Exception ex) {}
+			catch(Exception ex) {
+				throw ex;
+			}
 		}
 	}
 
@@ -322,5 +324,9 @@ public class IO {
 			nread += n;
 		}
 		return nread;
+	}
+
+	public static long pipe(File srcdFile, File dstFile) throws IOException {
+		return pipe(new FileInputStream(srcdFile), new FileOutputStream(dstFile));
 	}
 }
