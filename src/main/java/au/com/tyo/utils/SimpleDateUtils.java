@@ -195,6 +195,22 @@ public class SimpleDateUtils {
 		return new SimpleDateFormat("yyyyMMdd", Locale.US).format(date);
 	}
 
+	/**
+	 * @param date
+	 * @return date format like "201405012323"
+	 */
+	public static String dateToYMDHM(Date date) {
+		return new SimpleDateFormat("yyyyMMddkkmm", Locale.US).format(date);
+	}
+
+	/**
+	 * @param date
+	 * @return date format like "20140501232359"
+	 */
+	public static String dateToYMDHMS(Date date) {
+		return new SimpleDateFormat("yyyyMMddkkmmss", Locale.US).format(date);
+	}
+
     /**
      * @param date
      * @return date format like "Aug 19"
