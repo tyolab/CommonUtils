@@ -28,7 +28,6 @@ public class IO {
      *
      * @param fileIn
      * @return
-     * @throws Exception
      */
     public static Object readObject(InputStream fileIn) throws Exception {
         Object target = null;
@@ -53,7 +52,6 @@ public class IO {
 	 *
 	 * @param file
 	 * @return
-	 * @throws Exception
 	 */
 	public static Object readObject(File file) throws Exception {
 
@@ -327,6 +325,11 @@ public class IO {
 	}
 
 	public static long pipe(File srcdFile, File dstFile) throws IOException {
-		return pipe(new FileInputStream(srcdFile), new FileOutputStream(dstFile));
+		FileInputStream fileInputStream = new FileInputStream(srcdFile);
+		FileOutputStream fileOutputStream = new FileOutputStream(dstFile);
+		long nread = pipe(fileInputStream, fileOutputStream);
+		fileInputStream.close();
+		fileOutputStream.close();
+		return nread;
 	}
 }

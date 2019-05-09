@@ -438,6 +438,19 @@ public class FileUtils implements IOConstants {
 	}
 
 	/**
+	 * Append byte array to the end of the file with FileOutputStream
+	 *
+	 * @param destFile
+	 * @param contentToAppend
+	 * @throws IOException
+	 */
+	public static void append(File destFile, byte[] contentToAppend) throws IOException {
+		FileOutputStream outputStream = new FileOutputStream(destFile, true);
+		outputStream.write(contentToAppend);
+		outputStream.close();
+	}
+
+	/**
 	 *
 	 * For Java 7+, or Android 26+
 	 *
