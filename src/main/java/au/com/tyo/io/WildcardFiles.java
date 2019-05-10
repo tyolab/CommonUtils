@@ -134,18 +134,20 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 		
 		if (pattern == null) 
 			createPattern(wildcard);
-		
-	   File[] allFiles = fileDir.listFiles();
-	    for (File f : allFiles) {
-	        if (includeAllSubfolders && f.isDirectory()) {
-	        	if (this.toListAllFiles())
-	        		listFilesInStack(stack, f);
-	        	else
-	        		stack.push(f);
-	        }
-	        else if (accept(f))
-	        	stack.push(f);
-	    }
+
+		// Nullable
+	    File[] allFiles = fileDir.listFiles();
+	    if (null != allFiles)
+			for (File f : allFiles) {
+				if (includeAllSubfolders && f.isDirectory()) {
+					if (this.toListAllFiles())
+						listFilesInStack(stack, f);
+					else
+						stack.push(f);
+				}
+				else if (accept(f))
+					stack.push(f);
+			}
 	}
 	
 	/**
