@@ -12,6 +12,8 @@ import java.util.Stack;
 
 public class WildcardFileStack extends WildcardFiles<File> implements Comparator<File> {
 
+	private boolean ascendingOrder;
+
 	public WildcardFileStack(File file) {
 		this(file, "*");
 	}
@@ -20,6 +22,8 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 		super(file, pattern);
 
 		init(file, pattern);
+
+		ascendingOrder = true;
 	}
 
 	public WildcardFileStack(String inputfile, String pattern) {
@@ -76,7 +80,11 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 
 	@Override
 	public int compare(File lhs, File rhs) {
-		return rhs.lastModified() > lhs.lastModified() ? -1 : 1;
+		if (rhs.lastModified() == lhs.lastModified())
+			return 0;
+		if (ascendingOrder)
+			return rhs.lastModified() > lhs.lastModified() ? -1 : 1;
+		return rhs.lastModified() < lhs.lastModified() ? -1 : 1;
 	}
 
 	public void deleteAll() {
@@ -97,4 +105,7 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 		}
 	}
 
+	public void setAscendingOrder(boolean ascendingOrder) {
+		this.ascendingOrder = ascendingOrder;
+	}
 }
