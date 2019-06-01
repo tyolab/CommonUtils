@@ -35,6 +35,9 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 	protected boolean includeAllSubfolders = false;
 	
 	protected boolean toListAllFiles = false;
+
+	protected boolean folderOnly;
+	protected boolean fileOnly;
 	
 	//	protected static WildcardFiles wildcardfiles = null; //new WildcardFiles(wildcard);
 	
@@ -50,6 +53,14 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 	public WildcardFiles(File file, String pattern) {
 		inputFileDir = file;
 		createPattern(pattern);
+	}
+
+	public void setFolderOnly(boolean folderOnly) {
+		this.folderOnly = folderOnly;
+	}
+
+	public void setFileOnly(boolean fileOnly) {
+		this.fileOnly = fileOnly;
 	}
 
 	public boolean toListAllFiles() {
@@ -186,6 +197,11 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 	@Override
 	public boolean accept(File file)
 	{
+		if (fileOnly && !file.isFile())
+			return false;
+		if (folderOnly && !file.isDirectory())
+			return false;
+
 		return match(file.getName());
 	}
 
