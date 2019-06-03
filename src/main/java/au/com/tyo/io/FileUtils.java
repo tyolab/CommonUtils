@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * some code below was from:
  * 
- *  http://stackoverflow.com/questions/106770/standard-concise-way-to-copy-a-file-in-java
+ *  <a href="http://stackoverflow.com/questions/106770/standard-concise-way-to-copy-a-file-in-java">Copy File</a>
  */
 
 public class FileUtils implements IOConstants {

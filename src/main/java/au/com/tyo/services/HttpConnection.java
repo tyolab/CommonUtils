@@ -530,7 +530,7 @@ public abstract class HttpConnection<T extends HttpConnection> {
     }
     /**
      *
-     * code from: http://stackoverflow.com/questions/13592236/parse-a-uri-string-into-name-value-collection
+     * <a href="http://stackoverflow.com/questions/13592236/parse-a-uri-string-into-name-value-collection">Code From</a>
      *
      * @param url
      * @return

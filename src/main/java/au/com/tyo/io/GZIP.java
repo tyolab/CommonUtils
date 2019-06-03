@@ -19,10 +19,10 @@ import java.util.zip.GZIPOutputStream;
 
 import au.com.tyo.io.FileUtils.Progress;
 
-/*
+/**
  * Code from:
  * 
- * http://stackoverflow.com/questions/6717165/how-can-i-zip-and-unzip-a-string-using-gzipoutputstream-that-is-compatible-with
+ * <a href="http://stackoverflow.com/questions/6717165/how-can-i-zip-and-unzip-a-string-using-gzipoutputstream-that-is-compatible-with">How to</a>
  * 
  */
 

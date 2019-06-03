@@ -38,8 +38,12 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 
 	protected boolean folderOnly;
 	protected boolean fileOnly;
-	
-	//	protected static WildcardFiles wildcardfiles = null; //new WildcardFiles(wildcard);
+
+	/**
+	 * If the file is a file, length has to be > 0
+	 * If the file is a directory, the number of files inside it has to greater than zero
+	 */
+	protected boolean mustNotEmpty;
 	
 	public WildcardFiles(){
 		this("*.*");
@@ -202,11 +206,28 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 		if (folderOnly && !file.isDirectory())
 			return false;
 
+		if (mustNotEmpty) {
+			if (file.isFile() && file.length() == 0)
+				return false;
+			if (file.isDirectory()) {
+
+			}
+
+		}
+
 		return match(file.getName());
 	}
 
 	@Override
 	public boolean accept(File dir, String name) {
 		return match(name);
+	}
+
+	public boolean isMustNotEmpty() {
+		return mustNotEmpty;
+	}
+
+	public void setMustNotEmpty(boolean mustNotEmpty) {
+		this.mustNotEmpty = mustNotEmpty;
 	}
 }
