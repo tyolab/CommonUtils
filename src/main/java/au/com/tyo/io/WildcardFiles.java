@@ -210,7 +210,10 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 			if (file.isFile() && file.length() == 0)
 				return false;
 			if (file.isDirectory()) {
-
+				WildcardFileStack stack = new WildcardFileStack(file);
+				stack.listFiles();
+				if (stack.size() == 0)
+					return false;
 			}
 
 		}
