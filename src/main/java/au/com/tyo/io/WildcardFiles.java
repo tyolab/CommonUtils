@@ -44,6 +44,8 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 	 * If the file is a directory, the number of files inside it has to greater than zero
 	 */
 	protected boolean mustNotEmpty;
+
+	private FileFilter fileFilter;
 	
 	public WildcardFiles(){
 		this("*.*");
@@ -57,6 +59,12 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 	public WildcardFiles(File file, String pattern) {
 		inputFileDir = file;
 		createPattern(pattern);
+
+		fileFilter = null;
+	}
+
+	public void setFileFilter(FileFilter fileFilter) {
+		this.fileFilter = fileFilter;
 	}
 
 	public void setFolderOnly(boolean folderOnly) {
@@ -150,6 +158,13 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 		if (pattern == null) 
 			createPattern(wildcard);
 
+		FileFilter aFilter;
+
+		if (null != fileFilter)
+			aFilter = fileFilter;
+		else
+			aFilter = this;
+
 		// Nullable
 	    File[] allFiles = fileDir.listFiles();
 	    if (null != allFiles)
@@ -160,7 +175,7 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 					else
 						stack.push(f);
 				}
-				else if (accept(f))
+				else if (aFilter.accept(f))
 					stack.push(f);
 			}
 	}
@@ -215,7 +230,6 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 				if (stack.size() == 0)
 					return false;
 			}
-
 		}
 
 		return match(file.getName());
