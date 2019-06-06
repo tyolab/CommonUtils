@@ -28,11 +28,31 @@ public class ContentTypes {
         "wmv"
     };
 
+    private static final String[] AUDIO_EXTENSIONS = {
+            "wav",
+            "mp3",
+            "wma",
+            "vorbis",
+            "ogg",
+            "oga",
+            "voc",
+            "wv",
+            "8svx",
+            "ra",
+            "3gp",
+            "aa",
+            "aac",
+            "aax",
+            "act"
+    };
+
     private static final String[] TEXT_EXTENSIONS = {
             "txt"
     };
 
     private static final List VIDEO_EXTENSION_LIST = Arrays.asList(VIDEO_EXTENSIONS);
+
+    private static final List AUDIO_EXTENSION_LIST = Arrays.asList(AUDIO_EXTENSIONS);
 
     private static final String[] IMAGE_EXTENSIONS = {
             "png",
@@ -69,6 +89,17 @@ public class ContentTypes {
         if (null == ext || ext.length() == 0)
             return false;
         return isType(VIDEO_EXTENSION_LIST, ext);
+    }
+
+    /**
+     *
+     * @param ext
+     * @return
+     */
+    public static boolean isAudio(String ext) {
+        if (null == ext || ext.length() == 0)
+            return false;
+        return isType(AUDIO_EXTENSION_LIST, ext);
     }
 
     /**
@@ -161,5 +192,12 @@ public class ContentTypes {
         else
             pair[0] = file;
         return pair;
+    }
+
+    public static boolean isMedia(String name) {
+        String ext = getExtension(name);
+        if (null != ext)
+            return isImage(ext) || isVideo(ext);
+        return false;
     }
 }
