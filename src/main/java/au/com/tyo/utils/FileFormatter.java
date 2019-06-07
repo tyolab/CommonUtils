@@ -32,11 +32,11 @@ public class FileFormatter {
     }
 
     public static float byteSizeToMegabyte(float size, long precision) {
-        return ((long) (size / (1000000 / (precision * 10)))) / ((float)(precision * 10));
+        return ((long) (size / (SIZE_KB / (precision * 10)))) / ((float)(precision * 10));
     }
 
     public static float byteSizeToUnit(long unitThreshold, float size, int precision) {
-        return ((long) (size / (unitThreshold / (precision * 10)))) / ((float)(precision * 10));
+        return (float) ((long) (size / (unitThreshold / (precision * 10)))) / (precision * 10);
     }
 
     public static String byteSizeToMegabyteString(long size) {
@@ -55,13 +55,13 @@ public class FileFormatter {
         if (size <= SIZE_KB)
             return "" + size + ' ' + unitBytes;
         else if (size <= SIZE_MB)
-            return "" + byteSizeToUnit(SIZE_MB, size, precision) + ' ' + unitMb;
+            return "" + byteSizeToUnit(SIZE_KB, size, precision) + ' ' + unitKb;
         else if (size <= SIZE_GB)
-            return "" + byteSizeToUnit(SIZE_GB, size, precision) + ' ' + unitGb;
+            return "" + byteSizeToUnit(SIZE_MB, size, precision) + ' ' + unitMb;
         else if (size <= SIZE_TB)
-            return "" + byteSizeToUnit(SIZE_TB, size, precision) + ' ' + unitTb;
+            return "" + byteSizeToUnit(SIZE_GB, size, precision) + ' ' + unitGb;
         else if (size <= SIZE_PB)
-            return "" + byteSizeToUnit(SIZE_PB, size, precision) + ' ' + unitPb;
+            return "" + byteSizeToUnit(SIZE_TB, size, precision) + ' ' + unitTb;
         return "" + size;
     }
 }
