@@ -70,9 +70,25 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 		File file = null;
 		if (!empty()) {
 			file = pop();
-			if (file.isDirectory() && toListAllFiles) {
-				this.listFilesInStack(this, file);
-				file = next();
+			/**
+			 * toListAllFiles means list all files during the one list with looping searching through the sub directories
+			 *
+			 */
+			if (includeAllSubfolders && !toListAllFiles) {
+				while (file.isDirectory()) {
+					// need to put it back
+					push(file);
+
+					// the folder will be listed again
+					long fileNumber = this.listFilesInStack(this, file);
+
+					file = pop();
+
+					if (fileNumber == 0) {
+						// ok, no more to search
+						break;
+					}
+				}
 			}
 		}
 		return file;

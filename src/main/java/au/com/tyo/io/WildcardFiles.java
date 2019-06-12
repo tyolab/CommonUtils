@@ -33,11 +33,16 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 	protected File inputFileDir; // = new File(".");
 		
 	protected boolean includeAllSubfolders = false;
-	
+
+	/**
+	 * This is for listing all files including those in the sub(sub*)folders
+	 */
 	protected boolean toListAllFiles = false;
 
 	protected boolean folderOnly;
 	protected boolean fileOnly;
+
+	protected Pattern folderPattern;
 
 	/**
 	 * If the file is a file, length has to be > 0
@@ -151,9 +156,9 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
      * @param stack
      * @param fileDir
      */
-	public void listFilesInStack(Stack<File> stack, File fileDir) {
+	public long listFilesInStack(Stack<File> stack, File fileDir) {
 		if (!fileDir.exists())
-			return;
+			return 0;
 		
 		if (pattern == null) 
 			createPattern(wildcard);
@@ -167,17 +172,23 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 
 		// Nullable
 	    File[] allFiles = fileDir.listFiles();
+	    int count = allFiles.length;
 	    if (null != allFiles)
 			for (File f : allFiles) {
 				if (includeAllSubfolders && f.isDirectory()) {
-					if (this.toListAllFiles())
-						listFilesInStack(stack, f);
-					else
-						stack.push(f);
+					// put the subfolder in the stack itself
+					stack.push(f);
+
+					if (this.toListAllFiles()) {
+						count += listFilesInStack(stack, f);
+					}
 				}
 				else if (aFilter.accept(f))
 					stack.push(f);
+				else
+					--count;
 			}
+	    return count;
 	}
 	
 	/**
