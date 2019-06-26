@@ -10,8 +10,8 @@ import java.util.List;
  */
 
 public class ContentTypes {
-    
-    private static final String[] VIDEO_EXTENSIONS = {
+
+    private static String[] VIDEO_EXTENSIONS = {
         "mov",
         "avi",
         "mp4",
@@ -28,7 +28,7 @@ public class ContentTypes {
         "wmv"
     };
 
-    private static final String[] AUDIO_EXTENSIONS = {
+    private static String[] AUDIO_EXTENSIONS = {
             "wav",
             "mp3",
             "wma",
@@ -47,14 +47,18 @@ public class ContentTypes {
     };
 
     private static final String[] TEXT_EXTENSIONS = {
-            "txt"
+            "html",
+            "htm",
+            "json",
+            "txt",
+            "xml"
     };
 
     private static final List VIDEO_EXTENSION_LIST = Arrays.asList(VIDEO_EXTENSIONS);
 
     private static final List AUDIO_EXTENSION_LIST = Arrays.asList(AUDIO_EXTENSIONS);
 
-    private static final String[] IMAGE_EXTENSIONS = {
+    private static String[] IMAGE_EXTENSIONS = {
             "png",
             "gif",
             "jpg",
@@ -67,6 +71,13 @@ public class ContentTypes {
     };
 
     private static final List IMAGE_EXTENSION_LIST = Arrays.asList(IMAGE_EXTENSIONS);
+
+
+    static {
+        java.util.Arrays.sort(VIDEO_EXTENSIONS);
+        java.util.Arrays.sort(AUDIO_EXTENSIONS);
+        java.util.Arrays.sort(IMAGE_EXTENSIONS);
+    }
 
     public static String extensionCheck(String ext) {
         String newExt;
