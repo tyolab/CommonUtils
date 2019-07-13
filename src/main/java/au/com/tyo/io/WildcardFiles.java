@@ -157,7 +157,7 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
      * @param fileDir
      */
 	public long listFilesInStack(Stack<File> stack, File fileDir) {
-		if (!fileDir.exists())
+		if (null == fileDir && !fileDir.exists())
 			return 0;
 		
 		if (pattern == null) 
