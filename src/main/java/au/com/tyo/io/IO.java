@@ -324,6 +324,14 @@ public class IO {
 		return nread;
 	}
 
+	/**
+	 * Pipe inputstream to outputsream, and close them after it is done
+	 *
+	 * @param srcdFile
+	 * @param dstFile
+	 * @return
+	 * @throws IOException
+	 */
 	public static long pipe(File srcdFile, File dstFile) throws IOException {
 		FileInputStream fileInputStream = new FileInputStream(srcdFile);
 		FileOutputStream fileOutputStream = new FileOutputStream(dstFile);
