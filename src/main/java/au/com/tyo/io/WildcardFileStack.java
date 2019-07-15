@@ -109,8 +109,8 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 			boolean includSubfolders = includeAllSubfolders;
 
 			// delete files in subdirectories only when we come to it
-			includeAllSubfolders = false;
-			toListAllFiles = true;
+			includeAllSubfolders = true;
+			toListAllFiles = false;
 			listFiles();
 			File file;
 			while ((file = next()) != null) {
