@@ -172,8 +172,9 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 
 		// Nullable
 	    File[] allFiles = fileDir.listFiles();
-	    int count = allFiles.length;
-	    if (null != allFiles)
+	    int count = 0;
+	    if (null != allFiles) {
+			count = allFiles.length;
 			for (File f : allFiles) {
 				if (includeAllSubfolders && f.isDirectory()) {
 					// put the subfolder in the stack itself
@@ -182,12 +183,12 @@ public class WildcardFiles<T> extends Stack<T> implements FilenameFilter, FileFi
 					if (this.toListAllFiles()) {
 						count += listFilesInStack(stack, f);
 					}
-				}
-				else if (aFilter.accept(f))
+				} else if (aFilter.accept(f))
 					stack.push(f);
 				else
 					--count;
 			}
+		}
 	    return count;
 	}
 	
