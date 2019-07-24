@@ -70,8 +70,18 @@ public class ContentTypes {
             // more here
     };
 
+    private static String[] ANDROID_SUPPORTED_IMAGE_EXTENSIONS = {
+            "gif",
+            "jpg",
+            "jpeg",
+            "png",
+            "webp"
+    };
+
     private static final List IMAGE_EXTENSION_LIST = Arrays.asList(IMAGE_EXTENSIONS);
 
+
+    private static final List ANDROID_SUPPORTED_IMAGE_EXTENSIONS_LIST = Arrays.asList(ANDROID_SUPPORTED_IMAGE_EXTENSIONS);
 
     static {
         java.util.Arrays.sort(VIDEO_EXTENSIONS);
@@ -123,6 +133,13 @@ public class ContentTypes {
             return false;
 
         return isType(IMAGE_EXTENSION_LIST, ext);
+    }
+
+    public static boolean isAndroidSupportedImage(String ext) {
+        if (null == ext || ext.length() == 0)
+            return false;
+
+        return isType(ANDROID_SUPPORTED_IMAGE_EXTENSIONS_LIST, ext);
     }
 
     /**
