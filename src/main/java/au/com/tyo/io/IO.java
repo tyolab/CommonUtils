@@ -97,6 +97,7 @@ public class IO {
 			byteArrayOutputStream.write(buffer, 0, len);
 		}
 
+		byteArrayOutputStream.flush();
 		byteArrayOutputStream.close();
 		return byteArrayOutputStream.toByteArray();
 	}
