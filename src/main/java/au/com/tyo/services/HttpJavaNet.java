@@ -45,7 +45,7 @@ public class HttpJavaNet extends HttpConnection {
 
         connection = new URL(url).openConnection();
 
-		return 	(HttpURLConnection)connection;
+		return 	(HttpURLConnection) connection;
 	}
 
 	@Override
@@ -392,7 +392,10 @@ public class HttpJavaNet extends HttpConnection {
              * let's do it in the simplest way here for now
              */
             if (responseCode >= 300 && responseCode <= 310) {
-                return connectForInputStream(new HttpRequest(httpConn.getHeaderField("location")));
+                // need to create a new connection
+                String newUrl = httpConn.getHeaderField("location");
+                httpConn = null;
+                return connectForInputStream(new HttpRequest(newUrl));
             }
         }
         finally {
@@ -510,20 +513,19 @@ public class HttpJavaNet extends HttpConnection {
 	private void headerToCookie(Map<String, String> cookies, List<String> values) {
 		for (Iterator iter = values.iterator(); iter.hasNext(); ) {
 		     String cookie = (String) iter.next();
-		     
-		     /*
-		      * why ignore the session cookie?
-		      * comment it off for now
-		      */
-		     /*
-            if (cookie.contains("_session"))
-                continue;
-			 */
-		     
-            cookie = cookie.substring(0, cookie.indexOf(';'));
-            String name = cookie.substring(0, cookie.indexOf('='));
-            String value = cookie.substring(cookie.indexOf('=') + 1, cookie.length());
-            cookies.put(name, value);
+
+		     int pos = cookie.indexOf(';');
+		     if (pos > -1)
+                cookie = cookie.substring(0, pos);
+            try {
+                pos = cookie.indexOf('=');
+                String name = cookie.substring(0, pos);
+                String value = cookie.substring(pos + 1);
+                cookies.put(name, value);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
 		} 
 	}
 
@@ -562,7 +564,7 @@ public class HttpJavaNet extends HttpConnection {
     }
 
     @Override
-    protected void reset() {
+    public void reset() {
         super.reset();
         setInUsed(false);
         httpConn = null;
@@ -571,5 +573,12 @@ public class HttpJavaNet extends HttpConnection {
     @Override
     public String postForResult(HttpRequest settings) throws Exception {
         return processInputStreamAsString(post(settings));
+    }
+
+    public InputStream post(String url, Map params) throws Exception {
+        HttpRequest httpRequest = new HttpRequest(url);
+        httpRequest.setParams(params);
+
+        return post(httpRequest);
     }
 }

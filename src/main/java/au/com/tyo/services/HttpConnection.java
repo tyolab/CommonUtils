@@ -17,6 +17,7 @@ import java.net.URLEncoder;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -168,6 +169,15 @@ public abstract class HttpConnection<T extends HttpConnection> {
             if (hasParams())
                 return getQuery(params);
             return null;
+        }
+
+        public void setParams(Map map) {
+            Set entrySet = map.entrySet();
+            Iterator it = entrySet.iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                addParam(entry.getKey().toString(), entry.getValue().toString());
+            }
         }
 
         public Map paramsToMap() {
@@ -331,6 +341,10 @@ public abstract class HttpConnection<T extends HttpConnection> {
         method = whatMethod;
     }
 
+    public void setCacheCookie(boolean cacheCookie) {
+        this.cacheCookie = cacheCookie;
+    }
+
     public static String createCookieFile(String host) {
         return cookiePath + File.separator + host + ".cookie";
     }
@@ -395,6 +409,11 @@ public abstract class HttpConnection<T extends HttpConnection> {
 
     public synchronized String get(String url, boolean keepAlive) throws Exception {
         return get(url, 0, keepAlive);
+    }
+
+    public synchronized InputStream getInputStream(String url) throws Exception {
+        setMethod(METHOD_GET);
+        return connectForInputStream(url);
     }
 
     /**

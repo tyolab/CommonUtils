@@ -61,7 +61,13 @@ public class WildcardFileStack extends WildcardFiles<File> implements Comparator
 	public void listFiles() {
 		this.listFilesInStack(this, this.inputFileDir);
 	}
-	
+
+
+	public void sortByDate(boolean accending) {
+		ascendingOrder = accending;
+		sortByDate();
+	}
+
 	public void sortByDate() {
 		Collections.sort(this, this);
 	}
