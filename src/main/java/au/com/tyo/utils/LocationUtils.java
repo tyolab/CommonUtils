@@ -67,15 +67,19 @@ public class LocationUtils {
      * Calculate the distance between two GPS points
      *
      * @param location1, 0 latitude, 1 longitude
-     * @param location2
+     * @param location2, 0 latitude, 1 longitude
      * @return
      */
     public static double distance(double[] location1, double[] location2) {
-        double lat1 = degreeToRadian(location1[0]);
-        double lat2 = degreeToRadian(location2[0]);
+        return distance(location1[0], location1[1], location2[0], location2[1]);
+    }
+
+    public static double distance(double latitude1, double longitude1, double latitude2, double longitude2) {
+        double lat1 = degreeToRadian(latitude1);
+        double lat2 = degreeToRadian(latitude2);
 
         double dfLat = lat2 - lat1;
-        double dfLon = degreeToRadian(location2[1] - location1[1]);
+        double dfLon = degreeToRadian(longitude1 - longitude2);
 
         /**
          * rough

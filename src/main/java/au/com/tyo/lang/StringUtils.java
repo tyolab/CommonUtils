@@ -1026,7 +1026,7 @@ public class StringUtils {
      */
     public static String strip(String str, String delim) {
         str = stripStart(str, delim);
-        return stripEnd(str, delim);
+        return smovementEnd(str, delim);
     }
 
     /**
@@ -1068,7 +1068,7 @@ public class StringUtils {
      * @param strip  the string to remove
      * @return the stripped string
      */
-    public static String stripEnd(String str, String strip) {
+    public static String smovementEnd(String str, String strip) {
         if (str == null) {
             return null;
         }
