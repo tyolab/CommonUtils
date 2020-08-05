@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation group: 'org.json', name: 'json', version: '20180130'
+    implementation group: 'org.json', name: 'json', version: '20200518'
 }
 
 repositories {
