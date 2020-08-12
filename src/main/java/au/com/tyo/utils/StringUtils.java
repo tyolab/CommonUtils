@@ -42,28 +42,40 @@ public class StringUtils {
      * @return
      */
 	public static String arrayToString(Collection<?> c, String separator) {
-	    return arrayToString(c.toArray(), separator);
+	    return arrayToString(c.toArray(), separator, 0, c.size());
     }
 
-    public static String arrayToString(Object[] c, String separator) {
+	/**
+	 * Joining all items in an array together
+	 * Empty string / null object won't be ignored, if empty or null object needs special attension
+	 *
+	 * @param c
+	 * @param separator
+	 * @param from
+	 * @param length
+	 * @return
+	 */
+    public static String arrayToString(Object[] c, String separator, int from, int length) {
 		StringBuffer buffer = new StringBuffer();
-		for (Object o : c) {
+		for (int i = from; i < length; ++i) {
+			Object o  = c[i];
 		    if (o == null)
-		        continue;
+		        o = "null"; // we will let you know that a null object is joined
 
-		    if (o instanceof String && ((String) o).length() == 0)
-		        continue;
-
-			if (buffer.length() > 0)
+			if (i > from)
 				buffer.append(separator);
 			buffer.append(o.toString());
 		}
 		return buffer.toString();
 	}
 
-	public static String join(Object[] c, String separator) {
-	    return arrayToString(c, separator);
+	public static String join(Object[] c, String separator, int from, int length) {
+	    return arrayToString(c, separator, from, length);
     }
+
+	public static String join(Object[] c, String separator) {
+		return arrayToString(c, separator, 0, c.length);
+	}
 
     public static String join(String separator, Object... params) {
         return join(params, separator);
