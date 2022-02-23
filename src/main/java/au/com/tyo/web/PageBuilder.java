@@ -12,8 +12,9 @@ import au.com.tyo.CommonSettings;
 public class PageBuilder {
 
     public static String htmlTemplate;
-	
+
 	public static final String HTML_SECTION_DIV_END = "</div>\n";
+	public static final String HTML_DIV_END = "</div>\n";
 	
 	public static final String ASSETS_PATH_ANDROID = "file:///android_asset";
 
@@ -26,12 +27,22 @@ public class PageBuilder {
 	protected String html_header_content;
 	
 	protected String html_title_div;
+
+	private static String html_section_div_end;
+
+	static {
+		PageBuilder.html_section_div_end = HTML_SECTION_DIV_END;
+	}
 	
 	public PageBuilder() {
 		html_title_div = null;
 		html_header_content = null;
 	}
-	
+
+	public static void setHtmlSectionDivEnd(String html_section_div_end) {
+		PageBuilder.html_section_div_end = html_section_div_end;
+	}
+
 	public static String getAndroidAssetPath() {
 		return ASSETS_PATH_ANDROID;
 	}
@@ -57,10 +68,15 @@ public class PageBuilder {
 	}
 
 	public String toHtml(PageInterface page) {
-        if (null == getHtmlTemplate())
+		String template = getHtmlTemplate();
+        if (null == template)
             return toHtmlWithEmbeddedTemplate(page);
         else {
-            String temp = getHtmlTemplate().replaceAll("tyokiie/", HTML_ASSETS_ANDROID);
+			String temp = null;
+			if (CommonSettings.isAndroid())
+            	temp = template.replaceAll("tyokiie/", HTML_ASSETS_ANDROID);
+			else
+				temp = template;
 			temp = String.format(temp,
 					page.getLangCode(),
                     createHtmlAttributes(page),
@@ -164,9 +180,13 @@ public class PageBuilder {
 	public static void closeHtml(StringBuffer sb) {
 		sb.append("</html>\n");
 	}
-	
+
+	public static void closeSectionDiv(StringBuffer sb) {
+		sb.append(html_section_div_end);
+	}
+
 	public static void closeDiv(StringBuffer sb) {
-		sb.append(HTML_SECTION_DIV_END);
+		sb.append(HTML_DIV_END);
 	}
 
     public static void setHtmlTemplate(String htmlTemplate) {
