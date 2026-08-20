@@ -32,6 +32,7 @@ public class PageBuilder {
 	 */
 	public static String readerTheme = "day";
 	public static String readerFontPx = "16.5px";
+	public static String readerFace = "sans";
 
 	protected String html_header_content;
 	
@@ -177,6 +178,7 @@ public class PageBuilder {
         sb.append(" xml:parameters=\"" + html_page_parameters + "\"");
 
         sb.append(" data-rt=\"" + readerTheme + "\"");
+        sb.append(" data-font=\"" + readerFace + "\"");
         sb.append(" style=\"--r-fs:" + readerFontPx + "\"");
         return sb.toString();
     }
