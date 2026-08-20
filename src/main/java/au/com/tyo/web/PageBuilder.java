@@ -22,8 +22,17 @@ public class PageBuilder {
 
 	public static final String HTML_ASSETS_ANDROID = ASSETS_PATH_ANDROID + File.separator + HTML_STATIC_PATH + File.separator;
 	
-	public static String html_page_parameters = ""; 
-	
+	public static String html_page_parameters = "";
+
+	/**
+	 * Reader theme injected onto the <html> element so the first paint is already
+	 * themed (no flash). Set by the app from the persisted reading-theme setting
+	 * before an article is built. `readerTheme` is the resolved key (auto already
+	 * mapped to day/night); `readerFontPx` feeds the --r-fs custom property.
+	 */
+	public static String readerTheme = "day";
+	public static String readerFontPx = "16.5px";
+
 	protected String html_header_content;
 	
 	protected String html_title_div;
@@ -166,6 +175,9 @@ public class PageBuilder {
         sb.append(" xml:orientation=\"" + (CommonSettings.isLandscapeMode() ? "landscape" : "portrait") + "\"");
 
         sb.append(" xml:parameters=\"" + html_page_parameters + "\"");
+
+        sb.append(" data-rt=\"" + readerTheme + "\"");
+        sb.append(" style=\"--r-fs:" + readerFontPx + "\"");
         return sb.toString();
     }
 	
